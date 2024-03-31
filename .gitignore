@@ -1,0 +1,6 @@
+data/
+scripts/lammps_files
+*.trj
+*.log
+log*
+*.pyc
