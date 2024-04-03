@@ -334,7 +334,7 @@ def get_min_from_domain(f,domain):
 def get_pbc_distance(params,xi,xj):
     """
         Returns the real distance between xi and xj in 3D space with PBC.
-        ASSUMES POSITION UNITS ARE THE SAME AS LATTICE CONSTANT UNITS
+        ASSUMES POSITION UNITS ARE IN MICROMETERS
         ----------
         Parameters:
         * params: simulation parameters
@@ -349,7 +349,8 @@ def get_pbc_distance(params,xi,xj):
     xij_pbc = np.array(list(map( lambda xu: get_min_from_domain(np.abs,[xu,xu+L,xu-L]), xi-xj )))
     distance = np.sqrt(sum(xij_pbc**2))
     
-    return distance * params['lattice_constant'].units, xij_pbc/distance
+    #return distance * params['lattice_constant'].units, xij_pbc/distance
+    return distance, xij_pbc/distance
 
 def dipole_pair_energy(params,xi,xj,Bhat = np.array([1,0,0])):
     
@@ -367,11 +368,12 @@ def dipole_pair_energy(params,xi,xj,Bhat = np.array([1,0,0])):
     # Get the distance and magnetic moment
     distance, rhat = get_pbc_distance(params,xi,xj)
     
-    dimensional = (- params['mu0']*params['m']**2/4/np.pi/distance**3).to( ureg.pN * ureg.nm)
+    #dimensional = (- params['mu0']*params['m']**2/4/np.pi/distance**3).to( ureg.pN * ureg.nm)
+    dimensional = (params['freedom']/distance**3)
     adimensional = 3*Bhat.dot(rhat)**2 - 1
     
     
-    return (dimensional.magnitude * adimensional)
+    return (dimensional * adimensional)
 
 def calculate_energy(params,sel_particles):
     
@@ -504,7 +506,7 @@ def correlate_bframes(params,ts,sframes, stime= 0, etime = 60):
         ----------
         Parameters:
         * params
-        * ts: rparallel timeseries
+        * ts: rparallel timeseries where each row is a different particle
         * sframes: frames used in ts
         * start: start time (s)
         * end: end time (s)
