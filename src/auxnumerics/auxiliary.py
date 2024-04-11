@@ -143,6 +143,7 @@ def getVerticesAverage(counts,framerate):
     
     numberFrames = len(allFrames)
     numberRealizations = len(counts)
+    
 
     fractions = pd.DataFrame(columns=["time","I","II","III","IV","V","VI"], data = np.zeros((numberFrames,7)))
 
@@ -521,3 +522,6 @@ def correlate_bframes(params,ts,sframes, stime= 0, etime = 60):
     subselframes = np.array(sframes)[whichframes]
     return subselframes, [ autocorrelation(np.array(ps)[whichframes]) for ps in ts]
     
+    
+def bint(x):
+    return np.array([int(i) for i in x])

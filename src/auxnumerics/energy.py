@@ -20,7 +20,16 @@ ureg = ice.ureg
 idx = pd.IndexSlice
 
 @jit(nopython=True)
-def precompiled_calculate_energy(magic_number,L,sel_particles):
+def calculate_energy(dimensions,L,sel_particles):
+    """
+        Calculate the energy of a configuration of particles.
+        This functions uses numba for performance.
+        ----------
+        Parameters:
+        * dimensions:  The number - mu0*m*^2/4/pi in units pN*nm*um^3
+        * L: size*lattice_constant in um
+        * sel_particles: array where each row is the position of a particle
+    """
     n = len(sel_particles)
     
     H = 0
@@ -45,7 +54,7 @@ def precompiled_calculate_energy(magic_number,L,sel_particles):
             rhat = xij_pbc/distance
             
             Bhat = np.array([1,0,0])
-            dimensional = (magic_number/distance**3)
+            dimensional = (dimensions/distance**3)
             
             # yes, this is a dot product done by hand
             Bdotr = Bhat[0]*rhat[0] + Bhat[1]*rhat[1] + Bhat[2]*rhat[2] 
