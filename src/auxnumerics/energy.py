@@ -64,6 +64,42 @@ def calculate_energy(dimensions,L,sel_particles):
             H += dimensional*adimensional
     
     return H
+
+@jit(nopython=True)
+def calculate_energy_noperiodic(dimensions,sel_particles):
+    """
+        Calculate the energy of a configuration of particles.
+        This functions uses numba for performance.
+        ----------
+        Parameters:
+        * dimensions:  The number - mu0*m*^2/4/pi in units pN*nm*um^3
+        * sel_particles: array where each row is the position of a particle
+    """
+    n = len(sel_particles)
+    
+    H = 0
+    for i in range(n):
+        for j in range(i+1,n):
+            
+            xi = sel_particles[i]
+            xj = sel_particles[j]
+            
+            xij = xi - xj
+                
+            distance = np.sqrt((xij**2).sum())
+            rhat = xij/distance
+            
+            Bhat = np.array([1,0,0])
+            dimensional = (dimensions/distance**3)
+            
+            # yes, this is a dot product done by hand
+            Bdotr = Bhat[0]*rhat[0] + Bhat[1]*rhat[1] + Bhat[2]*rhat[2] 
+        
+            adimensional = 3*Bdotr**2 - 1
+            
+            H += dimensional*adimensional
+    
+    return H
             
             
     
