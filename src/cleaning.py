@@ -87,7 +87,7 @@ def clean_data(sim_path,realization):
     else:
         print("Skip")
     
-drive = r'/mnt/e/stuckgs/data/sims'
+drive = r'../data/afevo/'
 sizes = next(os.walk(drive))[1]
 
 for size in sizes:
