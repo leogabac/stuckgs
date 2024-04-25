@@ -7,6 +7,7 @@ ureg = ice.ureg
 
 QUENCH = 300*ureg.s
 EVOLUTION = 60*ureg.s
+
 sim_path = '../data/sims/'
 
 params = {
