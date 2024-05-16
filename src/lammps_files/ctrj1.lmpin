@@ -1,0 +1,45 @@
+### ---preamble--- ###
+log ././lammps_files/ctrj1.log
+units micro 
+atom_style hybrid ellipsoid paramagnet bond 
+boundary p p p 
+dimension 2 
+neighbor 1.0 nsq 
+neigh_modify every 1 delay 1 check yes
+pair_style hybrid lj/cut/dipole/cut 0 40 
+bond_style biharmonic 
+
+### ---Create Particles and Region--- ###
+read_data ././lammps_files/ctrj1.lmpdata
+group Atoms type 1 
+group Traps type 2 
+mass * 1
+group Atoms_1 type 1 
+
+### ---Variables--- ###
+
+## magnetic field
+variable Bmag atom 2.6614538978577816e-05
+variable freq atom 0.0
+variable theta atom 0.0
+variable phi atom 0.0
+
+variable fieldx atom v_Bmag/300e6*time*(time<30e6)+0.1*v_Bmag*(time>=30e6)*(time<60e6)+(v_Bmag/300e6*(time-60e6)+0.1*v_Bmag)*(time>=60e6)*(time<90e6)+0.2*v_Bmag*(time>=90e6)*(time<120e6)+(v_Bmag/300e6*(time-120e6)+0.2*v_Bmag)*(time>=120e6)*(time<150e6)+0.3*v_Bmag*(time>=150e6)*(time<180e6)+(v_Bmag/300e6*(time-180e6)+0.3*v_Bmag)*(time>=180e6)*(time<210e6)+0.4*v_Bmag*(time>=210e6)*(time<240e6)+(v_Bmag/300e6*(time-240e6)+0.4*v_Bmag)*(time>=240e6)*(time<270e6)+0.5*v_Bmag*(time>=270e6)*(time<300e6)+(v_Bmag/300e6*(time-300e6)+0.5*v_Bmag)*(time>=300e6)*(time<330e6)+0.6*v_Bmag*(time>=330e6)*(time<360e6)+(v_Bmag/300e6*(time-360e6)+0.6*v_Bmag)*(time>=360e6)*(time<390e6)+0.7*v_Bmag*(time>=390e6)*(time<420e6)+(v_Bmag/300e6*(time-420e6)+0.7*v_Bmag)*(time>=420e6)*(time<450e6)+0.8*v_Bmag*(time>=450e6)*(time<480e6)+(v_Bmag/300e6*(time-480e6)+0.8*v_Bmag)*(time>=480e6)*(time<510e6)+0.9*v_Bmag*(time>=510e6)*(time<540e6)+(v_Bmag/300e6*(time-540e6)+0.9*v_Bmag)*(time>=540e6)*(time<570e6)+1.0*v_Bmag*(time>=570e6)*(time<600e6)
+variable fieldy atom 0
+variable fieldz atom 0
+
+### ---Fixes--- ###
+
+fix 	1 Atoms setdipole v_fieldx v_fieldy v_fieldz 0
+fix 	2 Atoms bd 300 0.001 252727 
+
+fix 	3 Atoms addforce 0 0 -0.0 
+
+fix 	5 all enforce2d_bd
+
+### ---Run Commands--- ###
+timestep 	100.0 
+dump 	3 all custom 500 ././lammps_files/ctrj1.lammpstrj id type x	 y	 z	 mux	 muy	 muz
+thermo_style 	custom step atoms
+thermo 	100  
+run 	5000000 
