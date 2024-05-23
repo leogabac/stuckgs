@@ -27,7 +27,7 @@ ureg = ice.ureg
 idx = pd.IndexSlice
 
 
-data_path = '../data/afevo'
+data_path = '../data/simstair'
 
 def create_simulation(params,size,realization):
     
@@ -85,16 +85,16 @@ def create_simulation(params,size,realization):
     # pt1 = "v_Bmag/300e6*time*(time<30e6)+1*(time>=30e6)*(time<50e6)+"
 
 
-    pt1 = "v_Bmag/300e6*time*(time<30e6)+0.1*v_Bmag*(time>=30e6)*(time<60e6)+"
-    pt2 = "(v_Bmag/300e6*(time-60e6)+0.1*v_Bmag)*(time>=60e6)*(time<90e6)+0.2*v_Bmag*(time>=90e6)*(time<120e6)+"
-    pt3 = "(v_Bmag/300e6*(time-120e6)+0.2*v_Bmag)*(time>=120e6)*(time<150e6)+0.3*v_Bmag*(time>=150e6)*(time<180e6)+"
-    pt4 = "(v_Bmag/300e6*(time-180e6)+0.3*v_Bmag)*(time>=180e6)*(time<210e6)+0.4*v_Bmag*(time>=210e6)*(time<240e6)+"
-    pt5 = "(v_Bmag/300e6*(time-240e6)+0.4*v_Bmag)*(time>=240e6)*(time<270e6)+0.5*v_Bmag*(time>=270e6)*(time<300e6)+"
-    pt6 = "(v_Bmag/300e6*(time-300e6)+0.5*v_Bmag)*(time>=300e6)*(time<330e6)+0.6*v_Bmag*(time>=330e6)*(time<360e6)+"
-    pt7 = "(v_Bmag/300e6*(time-360e6)+0.6*v_Bmag)*(time>=360e6)*(time<390e6)+0.7*v_Bmag*(time>=390e6)*(time<420e6)+"
-    pt8 = "(v_Bmag/300e6*(time-420e6)+0.7*v_Bmag)*(time>=420e6)*(time<450e6)+0.8*v_Bmag*(time>=450e6)*(time<480e6)+"
-    pt9 = "(v_Bmag/300e6*(time-480e6)+0.8*v_Bmag)*(time>=480e6)*(time<510e6)+0.9*v_Bmag*(time>=510e6)*(time<540e6)+"
-    pt10 = "(v_Bmag/300e6*(time-540e6)+0.9*v_Bmag)*(time>=540e6)*(time<570e6)+1.0*v_Bmag*(time>=570e6)*(time<600e6)"
+    pt1 = "v_Bmag/300e6*time*(time<30e6)+0.1*v_Bmag*(time>=30e6)*(time<330e6)+"
+    pt2 = "(v_Bmag/300e6*(time-330e6)+0.1*v_Bmag)*(time>=330e6)*(time<360e6)+0.2*v_Bmag*(time>=360e6)*(time<660e6)+"
+    pt3 = "(v_Bmag/300e6*(time-660e6)+0.2*v_Bmag)*(time>=660e6)*(time<690e6)+0.3*v_Bmag*(time>=690e6)*(time<990e6)+"
+    pt4 = "(v_Bmag/300e6*(time-990e6)+0.3*v_Bmag)*(time>=990e6)*(time<1020e6)+0.4*v_Bmag*(time>=1020e6)*(time<1320e6)+"
+    pt5 = "(v_Bmag/300e6*(time-1320e6)+0.4*v_Bmag)*(time>=1320e6)*(time<1350e6)+0.5*v_Bmag*(time>=1350e6)*(time<1650e6)+"
+    pt6 = "(v_Bmag/300e6*(time-1650e6)+0.5*v_Bmag)*(time>=1650e6)*(time<1680e6)+0.6*v_Bmag*(time>=1680e6)*(time<1980e6)+"
+    pt7 = "(v_Bmag/300e6*(time-1980e6)+0.6*v_Bmag)*(time>=1980e6)*(time<2010e6)+0.7*v_Bmag*(time>=2010e6)*(time<2310e6)+"
+    pt8 = "(v_Bmag/300e6*(time-2310e6)+0.7*v_Bmag)*(time>=2310e6)*(time<2340e6)+0.8*v_Bmag*(time>=2340e6)*(time<2640e6)+"
+    pt9 = "(v_Bmag/300e6*(time-2640e6)+0.8*v_Bmag)*(time>=2640e6)*(time<2670e6)+0.9*v_Bmag*(time>=2670e6)*(time<2970e6)+"
+    pt10 = "(v_Bmag/300e6*(time-2970e6)+0.9*v_Bmag)*(time>=2970e6)*(time<3000e6)+1.0*v_Bmag*(time>=3000e6)*(time<3300e6)"
     col.sim.field.fieldx = pt1+pt2+pt3+pt4+pt5+pt6+pt7+pt8+pt9+pt10
     col.sim.field.fieldy = "0"
     col.sim.field.fieldz = "0"
@@ -138,7 +138,7 @@ def load_simulation(params,data_path,size,realization):
     
 
 
-size = 2
+size = 30
 realizations = [1]
 DATA_PATH = '../data/simstair/'
 

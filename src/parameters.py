@@ -5,7 +5,7 @@ sys.path.insert(0, '../../icenumerics/')
 import icenumerics as ice
 ureg = ice.ureg
 
-TOTAL_TIME  = 500*ureg.s
+TOTAL_TIME  = 3300*ureg.s
 
 params = {
     "particle_radius":1.4*ureg.um,
