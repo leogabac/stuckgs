@@ -116,8 +116,10 @@ def load_simulation(params,data_path,size,realization):
     col.sim.output_name =  col.sim.base_name+'.lammpstrj'
     col.sim.log_name =  col.sim.base_name+'.log'
 
-    col.load_simulation()
+    #print('load simulation')
+    #col.load_simulation()
 
+    print('making paths')
     trj_path = os.path.join(data_path,'trj')
     ctrj_path = os.path.join(data_path,'ctrj')
 
@@ -128,18 +130,21 @@ def load_simulation(params,data_path,size,realization):
         pass
     
 
-    filename = f"trj{realization}.csv"
-    col.trj.to_csv(os.path.join(trj_path,filename))
+   #filename = f"trj{realization}.csv"
+   
+    #print('saving usual trj')
+    #col.trj.to_csv(os.path.join(trj_path,filename))
 
-    filename = f"ctrj{realization}.csv"
-    #ice.get_ice_trj_low_memory(col,dir_name=ctrj_path)
-    trj = ice.get_ice_trj(col.trj, bounds = col.bnd)
-    trj.to_csv(os.path.join(ctrj_path,filename))
+    #filename = f"ctrj{realization}.csv"
+    print('low memory ctrj')
+    ice.get_ice_trj_low_memory(col,dir_name=ctrj_path)
+    #trj = ice.get_ice_trj(col.trj, bounds = col.bnd)
+    #trj.to_csv(os.path.join(ctrj_path,filename))
     
 
 
 size = 30
-realizations = [1]
+realizations = [1,2,3,4,5,6,7,8,9,10]
 DATA_PATH = '../data/simstair/'
 
 try:
@@ -149,16 +154,16 @@ except:
     pass
 
 
-with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-    results = list(
-        executor.map(
-            run_simulation,
-            [params] * len(realizations),
-            [size] * len(realizations),
-            realizations,
-        )
-    )
+#with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+#    results = list(
+#        executor.map(
+#            run_simulation,
+#            [params] * len(realizations),
+#            [size] * len(realizations),
+#            realizations,
+#        )
+#    )
 
-for i in range(1,2):
+for i in range(1,11):
      print(f'===== Realization {i} =====')
      load_simulation(params,SIZE_PATH,size,i)
