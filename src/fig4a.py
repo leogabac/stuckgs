@@ -24,14 +24,16 @@ ureg = ice.ureg
 
 idx = pd.IndexSlice
 
-sim_path = '../data/sims/'
+print("COMPUTING RPARALLELS")
+
+sim_path = '../data/simstair/'
 
 
 def get_rp_on_realization(sim_path,realization):
     ctrj = pd.read_csv(os.path.join(sim_path,'30','ctrj',f'xtrj{realization}.csv'), index_col=[0,1])
     particles = ctrj.index.get_level_values('id').unique().to_list()
     frames = ctrj.index.get_level_values('frame').unique().to_list()
-    sframes = frames[::5]
+    sframes = frames[::1]
     
     ts = []
 
@@ -58,7 +60,7 @@ def get_rp_on_realization(sim_path,realization):
 
 realizations = list(range(6,11))
 
-for i in range(6,11):
+for i in range(1,11):
     print(f'===== Realization {i} =====')
     get_rp_on_realization(sim_path,i)
     

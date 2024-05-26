@@ -32,9 +32,9 @@ ureg = ice.ureg
 idx = pd.IndexSlice
 
 sizes = ['30']
-data_path = r'../data/afevo/'
+data_path = r'../data/simstair/'
 
-
+print("COMPUTING VERTICES")
 for strsize in sizes:
     print(f"===== size {strsize} =====")
     params['size'] = int(strsize)
@@ -52,7 +52,6 @@ for strsize in sizes:
 
     for i in range(1,10+1):
 
-        trj_file = os.path.join(trj_path,f"trj{i}.csv")
         ctrj_file = os.path.join(ctrj_path,f"xtrj{i}.csv")
         vrt_file = os.path.join(vrt_path,f"vertices{i}.csv")
         
@@ -63,7 +62,6 @@ for strsize in sizes:
         # Importing files
         print(f"- realization {i} -")
         try:
-            trj_raw = trj = pd.read_csv(trj_file, index_col=[0,1])
             ctrj_raw = pd.read_csv(ctrj_file, index_col=[0,1])
         except:
             print(f"There is no such trj. Skipping")
@@ -73,7 +71,7 @@ for strsize in sizes:
         v = ice.vertices()
         frames = ctrj_raw.index.get_level_values("frame").unique()
 
-        v.trj_to_vertices(ctrj_raw.loc[frames[::20]])
+        v.trj_to_vertices(ctrj_raw.loc[frames[::1]])
 
         print(f"Saving vertices to " + vrt_file)
         v.vertices.to_csv(vrt_file)

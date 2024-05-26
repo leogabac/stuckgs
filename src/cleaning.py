@@ -58,7 +58,7 @@ def id_dict(df):
 def clean_data(sim_path,realization):
     
     # load the file
-    filepath = os.path.join(sim_path,'ctrj',f'ctrj{realization}.csv')
+    filepath = os.path.join(sim_path,'ctrj',f'lmctrj{realization}.csv')
     print("Cleaning...",filepath)
     
     # If the file does not exist, just return
@@ -87,7 +87,7 @@ def clean_data(sim_path,realization):
     else:
         print("Skip")
     
-drive = r'../data/afevo/'
+drive = r'../data/simstair/'
 sizes = next(os.walk(drive))[1]
 
 for size in sizes:
