@@ -22,22 +22,22 @@ ureg = ice.ureg
 
 idx = pd.IndexSlice
 
-data_path = '/media/eru/ina/stuckgs/data/simstair/30'
+data_path = '../data/simstair/30'
 vrt_temp = pd.read_csv(os.path.join(data_path,'vertices','vertices1.csv'),index_col=['frame','vertex'])
 vrt_frames = vrt_temp.index.get_level_values('frame').unique().to_list()
 
-h = 30
+h = 300
 intervals = [
- (30, 60),
- (90, 120),
- (150, 180),
- (210, 240),
- (270, 300),
- (330, 360),
- (390, 420),
- (450, 480),
- (510, 540),
- (570, 600),
+ (30, 330),
+ (360, 660),
+ (690, 990),
+ (1020, 1320),
+ (1350, 1650),
+ (1680, 1980),
+ (2010, 2310),
+ (2340, 2640),
+ (2670, 2970),
+ (3000, 3300),
 ]
 
 def is_between(x,low,high):
