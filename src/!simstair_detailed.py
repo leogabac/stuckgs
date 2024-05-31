@@ -27,7 +27,7 @@ ureg = ice.ureg
 idx = pd.IndexSlice
 
 
-data_path = '../data/simstair'
+data_path = '../data/simstair_detailed'
 
 def create_simulation(params,size,realization):
     
@@ -160,9 +160,9 @@ def load_simulation(params,data_path,size,realization):
     
 
 
-size = 30
-realizations = [1,2,3,4,5,6,7,8,9,10]
-DATA_PATH = '../data/simstair/'
+size = 2
+realizations = [1]
+DATA_PATH = '../data/simstair_detailed/'
 
 try:
     SIZE_PATH = os.path.join(DATA_PATH,str(size))
@@ -171,15 +171,15 @@ except:
     pass
 
 
-#with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-#    results = list(
-#        executor.map(
-#            run_simulation,
-#            [params] * len(realizations),
-#            [size] * len(realizations),
-#            realizations,
-#        )
-#    )
+with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+    results = list(
+        executor.map(
+            run_simulation,
+            [params] * len(realizations),
+            [size] * len(realizations),
+            realizations,
+        )
+    )
 
 for i in range(1,11):
      print(f'===== Realization {i} =====')
