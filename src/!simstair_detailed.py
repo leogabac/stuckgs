@@ -90,24 +90,24 @@ def create_simulation(params,size,realization):
 
     stair=[ 
         "v_Bmag/300e6*time*(time<30e6)+1*(time>=30e6)*(time<330e6)+", 
-        "(v_Bmag/300e6*(time-330e6)+1)*(time>=330e6)*(time<333e6)+1.1*(time>=333e6)*(time<633+e6)+",
-        "(v_Bmag/300e6*(time-633e6)+1.1)*(time>=633e6)*(time<636e6)+1.2*(time>=636e6)*(time<936+e6)+",
-        "(v_Bmag/300e6*(time-936e6)+1.2)*(time>=936e6)*(time<939e6)+1.3*(time>=939e6)*(time<1239+e6)+",
-        "(v_Bmag/300e6*(time-1239e6)+1.3)*(time>=1239e6)*(time<1242e6)+1.4*(time>=1242e6)*(time<1542+e6)+",
-        "(v_Bmag/300e6*(time-1542e6)+1.4)*(time>=1542e6)*(time<1545e6)+1.5*(time>=1545e6)*(time<1845+e6)+",
-        "(v_Bmag/300e6*(time-1845e6)+1.5)*(time>=1845e6)*(time<1848e6)+1.6*(time>=1848e6)*(time<2148+e6)+",
-        "(v_Bmag/300e6*(time-2148e6)+1.6)*(time>=2148e6)*(time<2151e6)+1.7*(time>=2151e6)*(time<2451+e6)+",
-        "(v_Bmag/300e6*(time-2451e6)+1.7)*(time>=2451e6)*(time<2454e6)+1.8*(time>=2454e6)*(time<2754+e6)+",
-        "(v_Bmag/300e6*(time-2754e6)+1.8)*(time>=2754e6)*(time<2757e6)+1.9*(time>=2757e6)*(time<3057+e6)+",
-        "(v_Bmag/300e6*(time-3057e6)+1.9)*(time>=3057e6)*(time<3060e6)+2*(time>=3060e6)*(time<3360+e6)+",
-        "(v_Bmag/300e6*(time-3360e6)+2)*(time>=3360e6)*(time<3390e6)+3*(time>=3390e6)*(time<3690+e6)+",
-        "(v_Bmag/300e6*(time-3690e6)+3)*(time>=3690e6)*(time<3720e6)+4*(time>=3720e6)*(time<4020+e6)+",
-        "(v_Bmag/300e6*(time-4020e6)+4)*(time>=4020e6)*(time<4050e6)+5*(time>=4050e6)*(time<4350+e6)+",
-        "(v_Bmag/300e6*(time-4350e6)+5)*(time>=4350e6)*(time<4380e6)+6*(time>=4380e6)*(time<4680+e6)+",
-        "(v_Bmag/300e6*(time-4680e6)+6)*(time>=4680e6)*(time<4710e6)+7*(time>=4710e6)*(time<5010+e6)+",
-        "(v_Bmag/300e6*(time-5010e6)+7)*(time>=5010e6)*(time<5040e6)+8*(time>=5040e6)*(time<5340+e6)+",
-        "(v_Bmag/300e6*(time-5340e6)+8)*(time>=5340e6)*(time<5370e6)+9*(time>=5370e6)*(time<5670+e6)+",
-        "(v_Bmag/300e6*(time-5670e6)+9)*(time>=5670e6)*(time<5700e6)+10*(time>=5700e6)*(time<6000+e6)"
+        "(v_Bmag/300e6*(time-330e6)+1)*(time>=330e6)*(time<333e6)+1.1*(time>=333e6)*(time<633e6)+",
+        "(v_Bmag/300e6*(time-633e6)+1.1)*(time>=633e6)*(time<636e6)+1.2*(time>=636e6)*(time<936e6)+",
+        "(v_Bmag/300e6*(time-936e6)+1.2)*(time>=936e6)*(time<939e6)+1.3*(time>=939e6)*(time<1239e6)+",
+        "(v_Bmag/300e6*(time-1239e6)+1.3)*(time>=1239e6)*(time<1242e6)+1.4*(time>=1242e6)*(time<1542e6)+",
+        "(v_Bmag/300e6*(time-1542e6)+1.4)*(time>=1542e6)*(time<1545e6)+1.5*(time>=1545e6)*(time<1845e6)+",
+        "(v_Bmag/300e6*(time-1845e6)+1.5)*(time>=1845e6)*(time<1848e6)+1.6*(time>=1848e6)*(time<2148e6)+",
+        "(v_Bmag/300e6*(time-2148e6)+1.6)*(time>=2148e6)*(time<2151e6)+1.7*(time>=2151e6)*(time<2451e6)+",
+        "(v_Bmag/300e6*(time-2451e6)+1.7)*(time>=2451e6)*(time<2454e6)+1.8*(time>=2454e6)*(time<2754e6)+",
+        "(v_Bmag/300e6*(time-2754e6)+1.8)*(time>=2754e6)*(time<2757e6)+1.9*(time>=2757e6)*(time<3057e6)+",
+        "(v_Bmag/300e6*(time-3057e6)+1.9)*(time>=3057e6)*(time<3060e6)+2*(time>=3060e6)*(time<336+e6)+",
+        "(v_Bmag/300e6*(time-3360e6)+2)*(time>=3360e6)*(time<3390e6)+3*(time>=3390e6)*(time<3690e6)+",
+        "(v_Bmag/300e6*(time-3690e6)+3)*(time>=3690e6)*(time<3720e6)+4*(time>=3720e6)*(time<4020e6)+",
+        "(v_Bmag/300e6*(time-4020e6)+4)*(time>=4020e6)*(time<4050e6)+5*(time>=4050e6)*(time<4350e6)+",
+        "(v_Bmag/300e6*(time-4350e6)+5)*(time>=4350e6)*(time<4380e6)+6*(time>=4380e6)*(time<4680e6)+",
+        "(v_Bmag/300e6*(time-4680e6)+6)*(time>=4680e6)*(time<4710e6)+7*(time>=4710e6)*(time<5010e6)+",
+        "(v_Bmag/300e6*(time-5010e6)+7)*(time>=5010e6)*(time<5040e6)+8*(time>=5040e6)*(time<5340e6)+",
+        "(v_Bmag/300e6*(time-5340e6)+8)*(time>=5340e6)*(time<5370e6)+9*(time>=5370e6)*(time<5670e6)+",
+        "(v_Bmag/300e6*(time-5670e6)+9)*(time>=5670e6)*(time<5700e6)+10*(time>=5700e6)*(time<6000e6)"
 ]
 
     # Then with 3 s increments up to 2 mT
