@@ -99,7 +99,7 @@ def create_simulation(params,size,realization):
         "(v_Bmag/300e6*(time-2148e6)+1.6)*(time>=2148e6)*(time<2151e6)+1.7*(time>=2151e6)*(time<2451e6)+",
         "(v_Bmag/300e6*(time-2451e6)+1.7)*(time>=2451e6)*(time<2454e6)+1.8*(time>=2454e6)*(time<2754e6)+",
         "(v_Bmag/300e6*(time-2754e6)+1.8)*(time>=2754e6)*(time<2757e6)+1.9*(time>=2757e6)*(time<3057e6)+",
-        "(v_Bmag/300e6*(time-3057e6)+1.9)*(time>=3057e6)*(time<3060e6)+2*(time>=3060e6)*(time<336+e6)+",
+        "(v_Bmag/300e6*(time-3057e6)+1.9)*(time>=3057e6)*(time<3060e6)+2*(time>=3060e6)*(time<336e6)+",
         "(v_Bmag/300e6*(time-3360e6)+2)*(time>=3360e6)*(time<3390e6)+3*(time>=3390e6)*(time<3690e6)+",
         "(v_Bmag/300e6*(time-3690e6)+3)*(time>=3690e6)*(time<3720e6)+4*(time>=3720e6)*(time<4020e6)+",
         "(v_Bmag/300e6*(time-4020e6)+4)*(time>=4020e6)*(time<4050e6)+5*(time>=4050e6)*(time<4350e6)+",

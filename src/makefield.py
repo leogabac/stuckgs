@@ -1,7 +1,7 @@
 
 
 def evolve_field(rate,stime,dinc,devo,sB,dB):
-    return f"({rate}*(time-{stime}e6)+{sB})*(time>={stime}e6)*(time<{stime+dinc}e6)+{sB+dB}*(time>={stime+dinc}e6)*(time<{stime+dinc+devo}+e6)+"
+    return f"({rate}*(time-{stime}e6)+{sB})*(time>={stime}e6)*(time<{stime+dinc}e6)+{sB+dB}*(time>={stime+dinc}e6)*(time<{stime+dinc+devo}e6)+"
 
 
 rate = "v_Bmag/300e6"
