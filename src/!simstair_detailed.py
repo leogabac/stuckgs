@@ -84,33 +84,30 @@ def create_simulation(params,size,realization):
 
     # Here i have a rate of 10/300 mT, to 
     # 30s will increment 1mT, but 3s will increment 0.1 mT
-    # I want to make those tiny increments between 0-1 and 1-2
-
-    rate = "v_Bmag/300e6"
+    # I want to make those tiny increments between 1-2
 
     stair=[ 
-        "v_Bmag/300e6*time*(time<30e6)+1*(time>=30e6)*(time<330e6)+", 
-        "(v_Bmag/300e6*(time-330e6)+1)*(time>=330e6)*(time<333e6)+1.1*(time>=333e6)*(time<633e6)+",
-        "(v_Bmag/300e6*(time-633e6)+1.1)*(time>=633e6)*(time<636e6)+1.2*(time>=636e6)*(time<936e6)+",
-        "(v_Bmag/300e6*(time-936e6)+1.2)*(time>=936e6)*(time<939e6)+1.3*(time>=939e6)*(time<1239e6)+",
-        "(v_Bmag/300e6*(time-1239e6)+1.3)*(time>=1239e6)*(time<1242e6)+1.4*(time>=1242e6)*(time<1542e6)+",
-        "(v_Bmag/300e6*(time-1542e6)+1.4)*(time>=1542e6)*(time<1545e6)+1.5*(time>=1545e6)*(time<1845e6)+",
-        "(v_Bmag/300e6*(time-1845e6)+1.5)*(time>=1845e6)*(time<1848e6)+1.6*(time>=1848e6)*(time<2148e6)+",
-        "(v_Bmag/300e6*(time-2148e6)+1.6)*(time>=2148e6)*(time<2151e6)+1.7*(time>=2151e6)*(time<2451e6)+",
-        "(v_Bmag/300e6*(time-2451e6)+1.7)*(time>=2451e6)*(time<2454e6)+1.8*(time>=2454e6)*(time<2754e6)+",
-        "(v_Bmag/300e6*(time-2754e6)+1.8)*(time>=2754e6)*(time<2757e6)+1.9*(time>=2757e6)*(time<3057e6)+",
-        "(v_Bmag/300e6*(time-3057e6)+1.9)*(time>=3057e6)*(time<3060e6)+2*(time>=3060e6)*(time<336e6)+",
-        "(v_Bmag/300e6*(time-3360e6)+2)*(time>=3360e6)*(time<3390e6)+3*(time>=3390e6)*(time<3690e6)+",
-        "(v_Bmag/300e6*(time-3690e6)+3)*(time>=3690e6)*(time<3720e6)+4*(time>=3720e6)*(time<4020e6)+",
-        "(v_Bmag/300e6*(time-4020e6)+4)*(time>=4020e6)*(time<4050e6)+5*(time>=4050e6)*(time<4350e6)+",
-        "(v_Bmag/300e6*(time-4350e6)+5)*(time>=4350e6)*(time<4380e6)+6*(time>=4380e6)*(time<4680e6)+",
-        "(v_Bmag/300e6*(time-4680e6)+6)*(time>=4680e6)*(time<4710e6)+7*(time>=4710e6)*(time<5010e6)+",
-        "(v_Bmag/300e6*(time-5010e6)+7)*(time>=5010e6)*(time<5040e6)+8*(time>=5040e6)*(time<5340e6)+",
-        "(v_Bmag/300e6*(time-5340e6)+8)*(time>=5340e6)*(time<5370e6)+9*(time>=5370e6)*(time<5670e6)+",
-        "(v_Bmag/300e6*(time-5670e6)+9)*(time>=5670e6)*(time<5700e6)+10*(time>=5700e6)*(time<6000e6)"
+        "v_Bmag/300e6*time*(time<30e6)+0.1*v_Bmag*(time>=30e6)*(time<330e6)+", 
+        "(v_Bmag/300e6*(time-330e6)+0.1*v_Bmag)*(time>=330e6)*(time<333e6)+0.11*v_Bmag*(time>=333e6)*(time<633e6)+",
+        "(v_Bmag/300e6*(time-633e6)+0.11*v_Bmag)*(time>=633e6)*(time<636e6)+0.12*v_Bmag*(time>=636e6)*(time<936e6)+",
+        "(v_Bmag/300e6*(time-936e6)+0.12*v_Bmag)*(time>=936e6)*(time<939e6)+0.13*v_Bmag*(time>=939e6)*(time<1239e6)+",
+        "(v_Bmag/300e6*(time-1239e6)+0.13*v_Bmag)*(time>=1239e6)*(time<1242e6)+0.14*v_Bmag*(time>=1242e6)*(time<1542e6)+",
+        "(v_Bmag/300e6*(time-1542e6)+0.14*v_Bmag)*(time>=1542e6)*(time<1545e6)+0.15*v_Bmag*(time>=1545e6)*(time<1845e6)+",
+        "(v_Bmag/300e6*(time-1845e6)+0.15*v_Bmag)*(time>=1845e6)*(time<1848e6)+0.16*v_Bmag*(time>=1848e6)*(time<2148e6)+",
+        "(v_Bmag/300e6*(time-2148e6)+0.16*v_Bmag)*(time>=2148e6)*(time<2151e6)+0.17*v_Bmag*(time>=2151e6)*(time<2451e6)+",
+        "(v_Bmag/300e6*(time-2451e6)+0.17*v_Bmag)*(time>=2451e6)*(time<2454e6)+0.18*v_Bmag*(time>=2454e6)*(time<2754e6)+",
+        "(v_Bmag/300e6*(time-2754e6)+0.18*v_Bmag)*(time>=2754e6)*(time<2757e6)+0.19*v_Bmag*(time>=2757e6)*(time<3057e6)+",
+        "(v_Bmag/300e6*(time-3057e6)+0.19*v_Bmag)*(time>=3057e6)*(time<3060e6)+0.2*v_Bmag*(time>=3060e6)*(time<3360e6)+",
+        "(v_Bmag/300e6*(time-3360e6)+0.2*v_Bmag)*(time>=3360e6)*(time<3390e6)+0.3*v_Bmag*(time>=3390e6)*(time<3690e6)+",
+        "(v_Bmag/300e6*(time-3690e6)+0.3*v_Bmag)*(time>=3690e6)*(time<3720e6)+0.4*v_Bmag*(time>=3720e6)*(time<4020e6)+",
+        "(v_Bmag/300e6*(time-4020e6)+0.4*v_Bmag)*(time>=4020e6)*(time<4050e6)+0.5*v_Bmag*(time>=4050e6)*(time<4350e6)+",
+        "(v_Bmag/300e6*(time-4350e6)+0.5*v_Bmag)*(time>=4350e6)*(time<4380e6)+0.6*v_Bmag*(time>=4380e6)*(time<4680e6)+",
+        "(v_Bmag/300e6*(time-4680e6)+0.6*v_Bmag)*(time>=4680e6)*(time<4710e6)+0.7*v_Bmag*(time>=4710e6)*(time<5010e6)+",
+        "(v_Bmag/300e6*(time-5010e6)+0.7*v_Bmag)*(time>=5010e6)*(time<5040e6)+0.8*v_Bmag*(time>=5040e6)*(time<5340e6)+",
+        "(v_Bmag/300e6*(time-5340e6)+0.8*v_Bmag)*(time>=5340e6)*(time<5370e6)+0.9*v_Bmag*(time>=5370e6)*(time<5670e6)+",
+        "(v_Bmag/300e6*(time-5670e6)+0.9*v_Bmag)*(time>=5670e6)*(time<5700e6)+1.0*v_Bmag*(time>=5700e6)*(time<6000e6)"
 ]
 
-    # Then with 3 s increments up to 2 mT
 
     col.sim.field.fieldx = "".join(stair)
     col.sim.field.fieldy = "0"
@@ -133,35 +130,20 @@ def load_simulation(params,data_path,size,realization):
     col.sim.output_name =  col.sim.base_name+'.lammpstrj'
     col.sim.log_name =  col.sim.base_name+'.log'
 
-    #print('load simulation')
-    #col.load_simulation()
-
-    print('making paths')
-    trj_path = os.path.join(data_path,'trj')
     ctrj_path = os.path.join(data_path,'ctrj')
 
     try:
-        os.mkdir(trj_path)
         os.mkdir(ctrj_path)
     except:
         pass
     
 
-   #filename = f"trj{realization}.csv"
-   
-    #print('saving usual trj')
-    #col.trj.to_csv(os.path.join(trj_path,filename))
-
-    #filename = f"ctrj{realization}.csv"
-    print('low memory ctrj')
     ice.get_ice_trj_low_memory(col,dir_name=ctrj_path)
-    #trj = ice.get_ice_trj(col.trj, bounds = col.bnd)
-    #trj.to_csv(os.path.join(ctrj_path,filename))
     
 
 
-size = 2
-realizations = [1]
+size = 30
+realizations = [1,2,3,4,5,6,7,8,9,10]
 DATA_PATH = '../data/simstair_detailed/'
 
 try:
@@ -171,7 +153,7 @@ except:
     pass
 
 
-with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+with concurrent.futures.ThreadPoolExecutor(max_workers=14) as executor:
     results = list(
         executor.map(
             run_simulation,
