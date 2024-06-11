@@ -32,7 +32,7 @@ ureg = ice.ureg
 idx = pd.IndexSlice
 
 sizes = ['30']
-data_path = r'../data/simstair/'
+data_path = r'../data/simstair_detailed/'
 
 print("COMPUTING VERTICES")
 for strsize in sizes:

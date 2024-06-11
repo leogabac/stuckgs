@@ -30,7 +30,7 @@ params = {
 }
 
 params["lattice_constant"] = params["trap_sep"]+(2*params["particle_radius"]+1*ureg.um)*np.sqrt(2)
-params['size'] = 2
+params['size'] = 30
 
 
 params['mu0'] = (4*np.pi)*1e-7 * ureg.H/ureg.m
