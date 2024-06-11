@@ -87,7 +87,7 @@ def clean_data(sim_path,realization):
     else:
         print("Skip")
     
-drive = r'../data/simstair/'
+drive = r'../data/simstair_detailed/'
 sizes = next(os.walk(drive))[1]
 
 for size in sizes:

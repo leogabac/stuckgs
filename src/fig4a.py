@@ -26,7 +26,7 @@ idx = pd.IndexSlice
 
 print("COMPUTING RPARALLELS")
 
-sim_path = '../data/simstair/'
+sim_path = '../data/simstair_detailed/'
 
 
 def get_rp_on_realization(sim_path,realization):
