@@ -64,7 +64,7 @@ def is_accepted(dE,T, kB =1):
         * T: Temperature
         * kB (obtional): Bolzman constant, defaults to 1.
     """
-    division = (dE/kB/T).to_base_units().magnitude
+    division = (dE/kB/T)
     if dE < 0:
         return True
     else:

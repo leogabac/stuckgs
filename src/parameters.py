@@ -22,7 +22,7 @@ params = {
     "isperiodic":True,
 
     "total_time":TOTAL_TIME,
-    "framespersec":20*ureg.Hz,
+    "framespersec":1*ureg.Hz,
     "dt":0.1*ureg.ms,
     "max_field":10*ureg.mT,
     "sim_temp":300*ureg.K,
