@@ -242,7 +242,10 @@ def get_topological_charge_at_vertex(indices,dirs):
     for i in range(len(indices)):
         idx = int(indices[i])
 
-        charge += dirs[idx][0]*dirs[i][0] + dirs[idx][1]*dirs[i][1] + dirs[idx][2]*dirs[i][2] 
+        # this is a dot product between direction \cdot towards
+        # this will give 1 if the spin points towards the vertex
+        # this will give -1 if the spin points away
+        charge += dirs[idx][0]*towards[i][0] + dirs[idx][1]*towards[i][1] + dirs[idx][2]*towards[i][2] 
         
 
     return charge
@@ -306,3 +309,122 @@ def get_objective_function(indices_matrix,dirs,N):
     kappa = charge_op(q)
     return np.abs(2*N**2 - np.abs(kappa))
 
+
+def display_vertices(trj,N,a,ax):
+
+    """
+        Plots the topological charges of a given trj.
+        ----------
+        Parameters:
+        * trj: trajectory dataframe
+        * N: vertices per side
+        * a: lattice constant
+        * ax: matplotlib.Axes object
+    """
+    
+    # generate the topology
+    centers, dirs, rels = trj2numpy(trj)
+
+    # lattice with the position of the vertices
+    vrt_lattice = vertices_lattice(a.magnitude,N,spos=(0,0))
+
+    # matrix with association vertex-colloid
+    indices_matrix = indices_lattice(vrt_lattice,centers, a.magnitude, N)
+
+    # lattice with the topological charges
+    q = get_charge_lattice(indices_matrix,dirs)
+
+    rows, cols = q.shape
+
+    for i in range(rows):
+        for j in range(cols):
+
+            if q[i,j] < 0:
+                c = 'blue'
+            elif q[i,j] >0:
+                c = 'red'
+            else:
+                c='k'
+
+            ax.add_artist( plt.Circle(
+                vrt_lattice[i,j,:2], # position
+                0.9*np.abs(q[i,j]), # radius
+                color=c
+                ))
+
+
+def normalize_spin(x):
+    return x/np.linalg.norm(x)
+
+def display_arrows(trj,N,a,ax):
+
+
+    # some plotting parameters
+    offset = 2.5
+
+
+    # generate the topology
+    centers, dirs, rels = trj2numpy(trj)
+
+    # lattice with the position of the vertices
+    vrt_lattice = vertices_lattice(a.magnitude,N,spos=(0,0))
+
+    # matrix with association vertex-colloid
+    indices_matrix = indices_lattice(vrt_lattice,centers, a.magnitude, N)
+
+
+    rows, cols = indices_matrix.shape[:2]
+
+    # testing purposes
+    for i in range(rows):
+        for j in range(cols):
+
+            # get the position
+            x,y,z = tuple(vrt_lattice[i,j,:])
+            # get the directions of the colloids related to the vertices
+            cidxs = [int(k) for k in  indices_matrix[i,j,:]]
+            # get the total direction of the arrow at vertex
+            # this is only the vector sum of all of the directions at the vetex
+            arrow_direction = normalize_spin( np.sum(dirs[cidxs], axis=0) )
+            dx,dy,dz= tuple(arrow_direction)
+
+            ax.add_artist( plt.Arrow(x-offset*dx,y-offset*dy,2*offset*dx,2*offset*dy, width=5, color='black'))
+
+
+def display_lines(trj,N,a,ax):
+
+    from matplotlib.lines import Line2D
+
+    # some plotting parameters
+    offset = 5
+
+
+    # generate the topology
+    centers, dirs, rels = trj2numpy(trj)
+
+    # lattice with the position of the vertices
+    vrt_lattice = vertices_lattice(a.magnitude,N,spos=(0,0))
+
+    # matrix with association vertex-colloid
+    indices_matrix = indices_lattice(vrt_lattice,centers, a.magnitude, N)
+
+
+    rows, cols = indices_matrix.shape[:2]
+
+    # testing purposes
+    for i in range(rows):
+        for j in range(cols):
+
+            # get the position
+            x,y,z = tuple(vrt_lattice[i,j,:])
+            # get the directions of the colloids related to the vertices
+            cidxs = [int(k) for k in  indices_matrix[i,j,:]]
+            # get the total direction of the arrow at vertex
+            # this is only the vector sum of all of the directions at the vetex
+            arrow_direction = normalize_spin( np.sum(dirs[cidxs], axis=0) )
+            dx,dy,dz= tuple(arrow_direction)
+
+
+            ax.add_line( Line2D([x-offset*dx, x+offset*dx ],[y-offset*dy, y+offset*dy ], color='#d10014', linewidth=3)    )
+
+            #ax.add_artist( plt.Arrow(x-offset*dx,y-offset*dy,2*offset*dx,2*offset*dy, width=5, color='red'))
