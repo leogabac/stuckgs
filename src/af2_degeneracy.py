@@ -71,7 +71,7 @@ def simulated_annealing(file_path, mcsteps, centers, dirs, rels, realization):
 
 
 ## initializing data types
-N = 100
+N = 50
 print(f'Size: {N}')
 a = params["lattice_constant"]
 afstate_path = '../data/states/af2'
@@ -87,4 +87,4 @@ file_path = f'../data/q2_degeneracy/s{N}.csv'
 
 for i in range(1,2):
     print(f'===== realization {i} =====')
-    simulated_annealing(file_path,int(1e6), centers, dirs, rels,i)
+    simulated_annealing(file_path,int(1e5), centers, dirs, rels,i)

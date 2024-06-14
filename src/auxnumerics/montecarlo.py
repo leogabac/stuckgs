@@ -11,16 +11,18 @@ import sys
 sys.path.insert(0, '../icenumerics/')
 import icenumerics as ice
 
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import math
 import itertools
 
 from math import isclose
 
 from auxiliary import *
 
-from numba import jit
+from numba import jit,prange
 
 
 ureg = ice.ureg
@@ -55,7 +57,7 @@ def numpy2trj(centers,dirs,rels):
     trj = trj.set_index(['frame', 'id'])
     return trj
 
-@jit(nopython=True)
+#@jit(nopython=True)
 def flip_spin(dirs,rels,idx):
     """
         Flips the spin at idx.
@@ -132,7 +134,16 @@ def fix_position(position,a,size):
 
 
 def flip_loop(a,size,centers,dirs,rels):
-    
+    """
+        Flips all colloids in a randomly selected loop
+        ----------
+        Parameters:
+        * a
+        * size
+        * centers
+        * dirs
+        * rels
+    """
     # choose one random colloid
     sel = np.random.randint(len(centers))
 
@@ -178,6 +189,7 @@ def vertices_lattice(a,L,spos=(15,15)):
         * L: size of the system
         * spos: Offcenter tuple.
     """
+
     xstart,ystart = spos
     xcoords = np.linspace(xstart,L*a-xstart,L+1)[:-1]
     ycoords = np.linspace(ystart,L*a-ystart,L+1)[:-1]
@@ -254,6 +266,10 @@ def get_topological_charge_at_vertex(indices,dirs):
 def get_charge_lattice(indices_lattice,dirs):
     """
         Computes the topological charge in the current lattice
+        ----------
+        Parameters:
+        * indices_lattice
+        * dirs
     """
 
     rows, cols = indices_lattice.shape[:2]
@@ -304,6 +320,14 @@ def charge_op(charged_vertices):
 
 
 def get_objective_function(indices_matrix,dirs,N):
+    """
+        Computes the objective function
+        ----------
+        Parameters
+        * indices_matrix
+        * dirs
+        * N
+    """
 
     q = get_charge_lattice(indices_matrix,dirs)
     kappa = charge_op(q)
@@ -311,7 +335,6 @@ def get_objective_function(indices_matrix,dirs,N):
 
 
 def display_vertices(trj,N,a,ax):
-
     """
         Plots the topological charges of a given trj.
         ----------
@@ -354,14 +377,29 @@ def display_vertices(trj,N,a,ax):
 
 
 def normalize_spin(x):
-    return x/np.linalg.norm(x)
+    """
+        What the name says bro.
+    """
+
+    norma = np.linalg.norm(x)
+    if norma == 0:
+        return x
+    else:
+        return x/np.linalg.norm(x)
 
 def display_arrows(trj,N,a,ax):
-
+    """ 
+        Displays the arrows at vertces
+        ----------
+        Parameters
+        * trj
+        * N
+        * a
+        * ax
+    """
 
     # some plotting parameters
     offset = 2.5
-
 
     # generate the topology
     centers, dirs, rels = trj2numpy(trj)
@@ -389,6 +427,38 @@ def display_arrows(trj,N,a,ax):
             dx,dy,dz= tuple(arrow_direction)
 
             ax.add_artist( plt.Arrow(x-offset*dx,y-offset*dy,2*offset*dx,2*offset*dy, width=5, color='black'))
+
+def dipole_lattice(centers,dirs,rels,vrt_lattice,indices_matrix):
+    """
+        Computes the lattice of the dipoles at each vertes
+        ----------
+        Parameters:
+        * centers
+        * dirs
+        * rels
+        * vrt_lattice
+        * indices_matrix 
+    """
+
+    rows, cols = indices_matrix.shape[:2]
+    arrow_lattice = np.zeros((rows,cols,3))
+    
+
+    for i in range(rows):
+        for j in range(cols):
+
+            # get the position
+            x,y,z = tuple(vrt_lattice[i,j,:])
+            # get the directions of the colloids related to the vertices
+            cidxs = [int(k) for k in  indices_matrix[i,j,:]]
+            # get the total direction of the arrow at vertex
+            # this is only the vector sum of all of the directions at the vetex
+            arrow_direction = normalize_spin( np.sum(dirs[cidxs], axis=0) )
+            arrow_lattice[i,j,:] = arrow_direction
+
+
+    return arrow_lattice
+
 
 
 def display_lines(trj,N,a,ax):
@@ -428,3 +498,102 @@ def display_lines(trj,N,a,ax):
             ax.add_line( Line2D([x-offset*dx, x+offset*dx ],[y-offset*dy, y+offset*dy ], color='#d10014', linewidth=3)    )
 
             #ax.add_artist( plt.Arrow(x-offset*dx,y-offset*dy,2*offset*dx,2*offset*dy, width=5, color='red'))
+
+
+@jit(nopython=True)
+def numba_pbc_displacement(xi,xj,L):
+        xij = xi - xj
+        ox = np.array([xij[0], xij[0]+L, xij[0]-L])
+        oy = np.array([xij[1], xij[1]+L, xij[1]-L])
+        oz = np.array([xij[2], xij[2]+L, xij[2]-L])
+        
+        ix = np.argmin(np.abs(ox))
+        iy = np.argmin(np.abs(oy))
+        iz = np.argmin(np.abs(oz))
+        
+        xij_pbc = np.array([ox[ix], oy[iy], oz[iz]])
+        
+        return xij_pbc
+
+@jit(nopython=True)
+def numba_pbc_distance(xi,xj,L):
+        xij = xi - xj
+        ox = np.array([xij[0], xij[0]+L, xij[0]-L])
+        oy = np.array([xij[1], xij[1]+L, xij[1]-L])
+        oz = np.array([xij[2], xij[2]+L, xij[2]-L])
+        
+        ix = np.argmin(np.abs(ox))
+        iy = np.argmin(np.abs(oy))
+        iz = np.argmin(np.abs(oz))
+        
+        xij_pbc = np.array([ox[ix], oy[iy], oz[iz]])
+        
+        return np.sqrt((xij_pbc**2).sum())
+
+@jit(nopython=True)
+def perp_diff_spin(Sia,q):
+    norma = np.linalg.norm(q)
+    
+    if norma==0:
+        qhat = q
+    else:
+        qhat = q / np.linalg.norm(q)
+
+
+    return Sia - qhat * ( q[0]*Sia[0] + q[1]*Sia[1] )
+
+@jit(nopython=True)
+def shameful_dotP2(x,y):
+    return x[0]*y[0] + x[1]*y[1]
+
+
+@jit(nopython=True)
+def single_point_msf_dipole_lattice(q,arrow_lattice,vrt_lattice,N,a,base_pairs):
+
+    suma = 0 # initialize
+    
+    # loop through all spin pairs
+    for i in range(len(base_pairs)):
+        for j in range(i,len(base_pairs)):
+            
+            ia = base_pairs[i]
+            jb = base_pairs[j]
+
+            Sia = arrow_lattice[ia[0],ia[1],:2]
+            Sib = arrow_lattice[jb[0],jb[1],:2]
+
+            Sia_perp = perp_diff_spin(Sia,q)
+            Sjb_perp = perp_diff_spin(Sib,q)
+
+            ria = vrt_lattice[ia[0],ia[1],:2]
+            rjb = vrt_lattice[jb[0],jb[1],:2]
+
+            # just be careful with this displacement...
+            # not sure if it is correct, i tried to consideer PBC
+            riajb = numba_pbc_displacement(ria,rjb, N*a)[:2]
+
+            term = shameful_dotP2(Sia_perp,Sjb_perp) * np.exp( 1j * shameful_dotP2(q,riajb)  )
+
+            # these are pretty much real
+            suma = suma + term.real
+
+    return suma/N
+
+@jit(nopython=True, parallel=True)
+def magnetic_structure_factor(reciprocal_lattice,arrow_lattice,vrt_lattice,N,a,base_pairs, progress_proxy):
+
+    rows, cols = reciprocal_lattice.shape[:2]
+    msf = np.zeros((rows,cols))
+
+    for j in prange(len(base_pairs)):
+
+        idx = base_pairs[j]
+        q = reciprocal_lattice[idx[0],idx[1],:]
+        msf[idx[0],idx[1]] = single_point_msf_dipole_lattice(q,arrow_lattice, vrt_lattice, N, a, base_pairs)
+
+        progress_proxy.update(1)
+
+
+    return msf
+
+

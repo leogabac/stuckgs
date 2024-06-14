@@ -69,5 +69,5 @@ def save_af2(data_path,N):
 
 data_path = "../data/states/"
 
-for size in tqdm(range(40,200,10)):
+for size in tqdm(range(10,30,10)):
     save_af2(data_path,size)
