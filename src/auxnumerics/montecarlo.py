@@ -28,17 +28,37 @@ from numba import jit,prange
 ureg = ice.ureg
 idx = pd.IndexSlice
 
+def create_lattice(a,N,spos=(0,0)):
+    """
+        Creates a (N,N,3) matrix where the element A[i,j,:] = [x,y,z] are the coordinates of a vertex.
+        Note that x varies with the columns so A[i,j+1,:] = [x+a,y,z]
+        ----------
+        Parameters:
+        * a: lattice constant
+        * N: vertices per side
+    """
+    xs,ys = spos
+    x = np.arange(xs,N*a,a)
+    y = np.arange(ys,N*a,a)
+    X,Y = np.meshgrid(x,y)
+    lattice = np.zeros((N,N,3))
+    lattice[:,:,0]=X
+    lattice[:,:,1]=Y
+    return lattice
+
+
 def trj2numpy(trj):
     """
         Takes a trj df and converts it to numpy arrays separated by centers, directions, and relative coordinate.
         ----------
         Parameters
-        * trj: trj dataframe
+        * trj: trajectory DataFrame
     """
     centers = trj[['x','y','z']].to_numpy()
     dirs = trj[['dx','dy','dz']].to_numpy()
     rels = trj[['cx','cy','cz']].to_numpy()
     return centers,dirs,rels
+
 
 def numpy2trj(centers,dirs,rels):
     """
@@ -57,7 +77,7 @@ def numpy2trj(centers,dirs,rels):
     trj = trj.set_index(['frame', 'id'])
     return trj
 
-#@jit(nopython=True)
+
 def flip_spin(dirs,rels,idx):
     """
         Flips the spin at idx.
@@ -77,6 +97,7 @@ def flip_spin(dirs,rels,idx):
 
     return dirs1, rels1
 
+
 @jit(nopython=True)
 def get_idx_from_position(centers,pos,tol=0.1):
     """
@@ -90,6 +111,7 @@ def get_idx_from_position(centers,pos,tol=0.1):
         distance = np.linalg.norm(center - pos)
         if np.isclose(0,distance,atol=tol):
             return i
+
 
 def is_horizontal(direction):
     """
@@ -105,6 +127,7 @@ def is_horizontal(direction):
         return True
     else:
         return False
+
 
 @jit(nopython=True)
 def fix_position(position,a,size):
@@ -138,11 +161,11 @@ def flip_loop(a,size,centers,dirs,rels):
         Flips all colloids in a randomly selected loop
         ----------
         Parameters:
-        * a
-        * size
-        * centers
-        * dirs
-        * rels
+        * a: lattice constant
+        * size: vertices per side
+        * centers: centers of the traps
+        * dirs: directions of the colloids
+        * rels: relative posisition of particles wrt the centers
     """
     # choose one random colloid
     sel = np.random.randint(len(centers))
@@ -180,24 +203,6 @@ def flip_loop(a,size,centers,dirs,rels):
 
     return dirs, rels
 
-def vertices_lattice(a,L,spos=(15,15)):
-    """
-        Create a matrix of shape (L,L,3) that stores the coordinates of the vertices
-        ----------
-        Parameters:
-        * a: lattice constant
-        * L: size of the system
-        * spos: Offcenter tuple.
-    """
-
-    xstart,ystart = spos
-    xcoords = np.linspace(xstart,L*a-xstart,L+1)[:-1]
-    ycoords = np.linspace(ystart,L*a-ystart,L+1)[:-1]
-    zcoords = [0]
-
-    global_pos = [ np.array(element) for element in itertools.product(xcoords,ycoords,zcoords) ]
-
-    return np.reshape(global_pos,(L,L,3))
 
 def indices_lattice(vrt_lattice,centers,a,N):
     """
@@ -233,6 +238,7 @@ def indices_lattice(vrt_lattice,centers,a,N):
     
     return indices_matrix
 
+
 @jit(nopython=True)
 def get_topological_charge_at_vertex(indices,dirs):
     """
@@ -262,6 +268,7 @@ def get_topological_charge_at_vertex(indices,dirs):
 
     return charge
 
+
 @jit(nopython=True)
 def get_charge_lattice(indices_lattice,dirs):
     """
@@ -280,6 +287,7 @@ def get_charge_lattice(indices_lattice,dirs):
             charges[i,j] = get_topological_charge_at_vertex(indices_lattice[i,j,:],dirs)
     
     return charges
+
 
 @jit(nopython=True)
 def is_accepted(dE,T, kB =1):
@@ -300,6 +308,7 @@ def is_accepted(dE,T, kB =1):
             return True
         else:
             return False
+
 
 @jit(nopython=True)
 def charge_op(charged_vertices):
@@ -324,15 +333,29 @@ def get_objective_function(indices_matrix,dirs,N):
         Computes the objective function
         ----------
         Parameters
-        * indices_matrix
-        * dirs
-        * N
+        * indices_matrix: association matrix
+        * dirs: traps directions
+        * N: vertices per side
     """
 
     q = get_charge_lattice(indices_matrix,dirs)
     kappa = charge_op(q)
     return np.abs(2*N**2 - np.abs(kappa))
 
+
+def obj_icerule(indices_matrix,dirs,N):
+    """
+        Computes the objective function
+        ----------
+        Parameters
+        * indices_matrix: association matrix
+        * dirs: traps directions
+        * N: vertices per side
+    """
+
+    q = get_charge_lattice(indices_matrix,dirs)
+    kappa = charge_op(q)
+    return np.abs(kappa)
 
 def display_vertices(trj,N,a,ax):
     """
@@ -347,11 +370,7 @@ def display_vertices(trj,N,a,ax):
     
     # generate the topology
     centers, dirs, rels = trj2numpy(trj)
-
-    # lattice with the position of the vertices
-    vrt_lattice = vertices_lattice(a.magnitude,N,spos=(0,0))
-
-    # matrix with association vertex-colloid
+    vrt_lattice = create_lattice(a.magnitude,N,spos=(0,0))
     indices_matrix = indices_lattice(vrt_lattice,centers, a.magnitude, N)
 
     # lattice with the topological charges
@@ -376,9 +395,12 @@ def display_vertices(trj,N,a,ax):
                 ))
 
 
-def normalize_spin(x):
+def normalize(x):
     """
         What the name says bro.
+        ----------
+        Parameters:
+        * x: some np.array
     """
 
     norma = np.linalg.norm(x)
@@ -387,33 +409,26 @@ def normalize_spin(x):
     else:
         return x/np.linalg.norm(x)
 
+
 def display_arrows(trj,N,a,ax):
     """ 
         Displays the arrows at vertces
         ----------
         Parameters
-        * trj
-        * N
-        * a
-        * ax
+        * trj: trajectory DataFrame
+        * N: vertices per side
+        * a: lattice constant
+        * ax: plt.Axes object
     """
 
-    # some plotting parameters
     offset = 2.5
-
     # generate the topology
     centers, dirs, rels = trj2numpy(trj)
-
-    # lattice with the position of the vertices
-    vrt_lattice = vertices_lattice(a.magnitude,N,spos=(0,0))
-
-    # matrix with association vertex-colloid
+    vrt_lattice = create_lattice(a.magnitude,N,spos=(0,0))
     indices_matrix = indices_lattice(vrt_lattice,centers, a.magnitude, N)
-
 
     rows, cols = indices_matrix.shape[:2]
 
-    # testing purposes
     for i in range(rows):
         for j in range(cols):
 
@@ -423,65 +438,64 @@ def display_arrows(trj,N,a,ax):
             cidxs = [int(k) for k in  indices_matrix[i,j,:]]
             # get the total direction of the arrow at vertex
             # this is only the vector sum of all of the directions at the vetex
-            arrow_direction = normalize_spin( np.sum(dirs[cidxs], axis=0) )
+            arrow_direction = normalize( np.sum(dirs[cidxs], axis=0) )
             dx,dy,dz= tuple(arrow_direction)
 
             ax.add_artist( plt.Arrow(x-offset*dx,y-offset*dy,2*offset*dx,2*offset*dy, width=5, color='black'))
+
 
 def dipole_lattice(centers,dirs,rels,vrt_lattice,indices_matrix):
     """
         Computes the lattice of the dipoles at each vertes
         ----------
         Parameters:
-        * centers
-        * dirs
-        * rels
-        * vrt_lattice
-        * indices_matrix 
+        * centers: centers of the traps
+        * dirs: directions of the colloids
+        * rels: relative position wrt the center of the trap
+        * vrt_lattice: lattice with the position of the vertices
+        * indices_matrix: assocition matrix
     """
 
     rows, cols = indices_matrix.shape[:2]
     arrow_lattice = np.zeros((rows,cols,3))
     
-
     for i in range(rows):
         for j in range(cols):
 
-            # get the position
-            x,y,z = tuple(vrt_lattice[i,j,:])
             # get the directions of the colloids related to the vertices
             cidxs = [int(k) for k in  indices_matrix[i,j,:]]
             # get the total direction of the arrow at vertex
             # this is only the vector sum of all of the directions at the vetex
-            arrow_direction = normalize_spin( np.sum(dirs[cidxs], axis=0) )
+            arrow_direction = normalize( np.sum(dirs[cidxs], axis=0) )
             arrow_lattice[i,j,:] = arrow_direction
 
 
     return arrow_lattice
 
 
-
 def display_lines(trj,N,a,ax):
+    """
+        Displays the lines connecting the dipole arros at each vertex.
+        ----------
+        Parameters:
+        * trj: trajectory DataFrame
+        * N: vertices per side
+        * a: lattice constant 
+        * ax: plt.Axes object
+    """
 
     from matplotlib.lines import Line2D
 
     # some plotting parameters
     offset = 5
 
-
     # generate the topology
     centers, dirs, rels = trj2numpy(trj)
-
-    # lattice with the position of the vertices
-    vrt_lattice = vertices_lattice(a.magnitude,N,spos=(0,0))
-
-    # matrix with association vertex-colloid
+    vrt_lattice = create_lattice(a.magnitude,N,spos=(0,0))
     indices_matrix = indices_lattice(vrt_lattice,centers, a.magnitude, N)
-
 
     rows, cols = indices_matrix.shape[:2]
 
-    # testing purposes
     for i in range(rows):
         for j in range(cols):
 
@@ -491,109 +505,117 @@ def display_lines(trj,N,a,ax):
             cidxs = [int(k) for k in  indices_matrix[i,j,:]]
             # get the total direction of the arrow at vertex
             # this is only the vector sum of all of the directions at the vetex
-            arrow_direction = normalize_spin( np.sum(dirs[cidxs], axis=0) )
+            arrow_direction = normalize( np.sum(dirs[cidxs], axis=0) )
             dx,dy,dz= tuple(arrow_direction)
 
 
             ax.add_line( Line2D([x-offset*dx, x+offset*dx ],[y-offset*dy, y+offset*dy ], color='#d10014', linewidth=3)    )
 
-            #ax.add_artist( plt.Arrow(x-offset*dx,y-offset*dy,2*offset*dx,2*offset*dy, width=5, color='red'))
-
 
 @jit(nopython=True)
 def numba_pbc_displacement(xi,xj,L):
-        xij = xi - xj
-        ox = np.array([xij[0], xij[0]+L, xij[0]-L])
-        oy = np.array([xij[1], xij[1]+L, xij[1]-L])
-        oz = np.array([xij[2], xij[2]+L, xij[2]-L])
-        
-        ix = np.argmin(np.abs(ox))
-        iy = np.argmin(np.abs(oy))
-        iz = np.argmin(np.abs(oz))
-        
-        xij_pbc = np.array([ox[ix], oy[iy], oz[iz]])
-        
-        return xij_pbc
+    """
+        Determines the displacement vector with PBC.
+        ----------
+        Parameters:
+        * xi: position 
+        * xj: position
+        * L: N*a
+    """
+    xij = xi - xj
+    ox = np.array([xij[0], xij[0]+L, xij[0]-L])
+    oy = np.array([xij[1], xij[1]+L, xij[1]-L])
+    oz = np.array([xij[2], xij[2]+L, xij[2]-L])
+    
+    ix = np.argmin(np.abs(ox))
+    iy = np.argmin(np.abs(oy))
+    iz = np.argmin(np.abs(oz))
+    
+    xij_pbc = np.array([ox[ix], oy[iy], oz[iz]])
+    
+    return xij_pbc
+
 
 @jit(nopython=True)
 def numba_pbc_distance(xi,xj,L):
-        xij = xi - xj
-        ox = np.array([xij[0], xij[0]+L, xij[0]-L])
-        oy = np.array([xij[1], xij[1]+L, xij[1]-L])
-        oz = np.array([xij[2], xij[2]+L, xij[2]-L])
-        
-        ix = np.argmin(np.abs(ox))
-        iy = np.argmin(np.abs(oy))
-        iz = np.argmin(np.abs(oz))
-        
-        xij_pbc = np.array([ox[ix], oy[iy], oz[iz]])
-        
-        return np.sqrt((xij_pbc**2).sum())
+    """
+        Computes the distance between xi an xj with PBC 
+        ----------
+        Parameters:
+        * xi: position 
+        * xj: position 
+        * L: N*a 
+    """ 
+       
+    xij_pbc = numba_pbc_displacement(xi,xj,L)
+    
+    return np.sqrt((xij_pbc**2).sum())
+
 
 @jit(nopython=True)
 def perp_diff_spin(Sia,q):
+    """
+        Perpendicular spin component to the diffusion vector q 
+        Sia = Sia - (Sia cdot q) q_hat 
+        ----------
+        Parameters:
+        * Sia: Some spin 
+        * q: Some position in the reciprocal_lattice
+    """
     norma = np.linalg.norm(q)
-    
-    if norma==0:
-        qhat = q
-    else:
-        qhat = q / np.linalg.norm(q)
+    qhat = q/norma
 
+    return Sia - qhat * ( qhat[0]*Sia[0] + qhat[1]*Sia[1] )
 
-    return Sia - qhat * ( q[0]*Sia[0] + q[1]*Sia[1] )
 
 @jit(nopython=True)
-def shameful_dotP2(x,y):
+def dotp(x,y):
+    """
+        Hardcoded dot product
+        ----------
+        Parameters:
+        x: array 
+        y: array
+    """
     return x[0]*y[0] + x[1]*y[1]
 
 
+
 @jit(nopython=True)
-def single_point_msf_dipole_lattice(q,arrow_lattice,vrt_lattice,N,a,base_pairs):
+def single_msf_colloids(centers,dirs,rels,N,a,q):
 
-    suma = 0 # initialize
-    
-    # loop through all spin pairs
-    for i in range(len(base_pairs)):
-        for j in range(i,len(base_pairs)):
+    suma = 0
+    # here i want to loop through all pairs
+    for i in range(len(centers)):
+        for j in range(i,len(centers)):
+            Sia_perp = perp_diff_spin(dirs[i][:2],q)
+            Sjb_perp = perp_diff_spin(dirs[j][:2],q)
             
-            ia = base_pairs[i]
-            jb = base_pairs[j]
+            # i am considering that the colloidal flip_spin
+            # is located at the center of the trap
+            riajb = numba_pbc_displacement( centers[i], centers[j], N*a ) 
 
-            Sia = arrow_lattice[ia[0],ia[1],:2]
-            Sib = arrow_lattice[jb[0],jb[1],:2]
+            term = dotp(Sia_perp,Sjb_perp) * np.exp(1j * dotp(q,riajb) )
 
-            Sia_perp = perp_diff_spin(Sia,q)
-            Sjb_perp = perp_diff_spin(Sib,q)
-
-            ria = vrt_lattice[ia[0],ia[1],:2]
-            rjb = vrt_lattice[jb[0],jb[1],:2]
-
-            # just be careful with this displacement...
-            # not sure if it is correct, i tried to consideer PBC
-            riajb = numba_pbc_displacement(ria,rjb, N*a)[:2]
-
-            term = shameful_dotP2(Sia_perp,Sjb_perp) * np.exp( 1j * shameful_dotP2(q,riajb)  )
-
-            # these are pretty much real
             suma = suma + term.real
+            
 
-    return suma/N
+    # idk that the N in the equation is, i believe it is the number of vertices? N**2?
+    return suma/2/(N**2)
 
-@jit(nopython=True, parallel=True)
-def magnetic_structure_factor(reciprocal_lattice,arrow_lattice,vrt_lattice,N,a,base_pairs, progress_proxy):
+
+@jit(nopython=True,parallel=True)
+def magnetic_structure_factor(centers,dirs,rels,N,a,reciprocal_lattice,rc_pairs,progress_proxy):
 
     rows, cols = reciprocal_lattice.shape[:2]
     msf = np.zeros((rows,cols))
 
-    for j in prange(len(base_pairs)):
+    for j in prange(len(rc_pairs)):
 
-        idx = base_pairs[j]
+        idx = rc_pairs[j]
         q = reciprocal_lattice[idx[0],idx[1],:]
-        msf[idx[0],idx[1]] = single_point_msf_dipole_lattice(q,arrow_lattice, vrt_lattice, N, a, base_pairs)
+        msf[idx[0],idx[1]] = single_msf_colloids(centers,dirs,rels,N,a,q)
 
         progress_proxy.update(1)
 
-
     return msf
-
-
