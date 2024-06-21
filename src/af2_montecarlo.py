@@ -35,8 +35,8 @@ def simulated_annealing(file_path, mcsteps, centers, dirs, rels, realization):
     for i in tqdm(range(mcsteps)):
 
         # generate new configuration
-        dirs_new, rels_new = mc.flip_loop(params['lattice_constant'].magnitude, N, centers,dirs,rels)
-        #dirs_new,rels_new = mc.flip_spin(dirs_new,rels_new,np.random.randint(0,len(dirs)))
+        a = np.round(params["lattice_constant"],5)
+        dirs_new, rels_new, pos = mc.flip_loop(a.magnitude, N, centers,dirs,rels)
 
         # compute the new energy
         Enew = mc.get_objective_function(indices_matrix,dirs_new,N)
@@ -60,6 +60,7 @@ def simulated_annealing(file_path, mcsteps, centers, dirs, rels, realization):
     
     # save the stuff
     print('saving...')
+    print(file_path)
     df = mc.numpy2trj(centers,dirs,rels)
     df['realization'] = [realization]*len(df)
 
@@ -71,9 +72,10 @@ def simulated_annealing(file_path, mcsteps, centers, dirs, rels, realization):
 
 
 ## initializing data types
-N = 10
+N = 20
 print(f'Size: {N}')
-a = params["lattice_constant"]
+a = np.round(params["lattice_constant"],5)
+print(f'a: {a}')
 afstate_path = '../data/states/af2'
 
 ## stuff before the simulated annealing process
@@ -85,6 +87,6 @@ indices_matrix = mc.indices_lattice(vrt_lattice,centers, a.magnitude, N)
 
 file_path = f'../data/q2_degeneracy/s{N}.csv'
 
-for i in range(1,2):
+for i in range(2,3):
     print(f'===== realization {i} =====')
-    simulated_annealing(file_path,int(1e5), centers, dirs, rels,i)
+    simulated_annealing(file_path,int(1e6), centers, dirs, rels,i)

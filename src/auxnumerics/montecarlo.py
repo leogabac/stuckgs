@@ -156,7 +156,7 @@ def fix_position(position,a,size):
     return position
 
 
-def flip_loop(a,size,centers,dirs,rels):
+def flip_loop(a,size,centers,dirs,rels, idx = None):
     """
         Flips all colloids in a randomly selected loop
         ----------
@@ -168,23 +168,26 @@ def flip_loop(a,size,centers,dirs,rels):
         * rels: relative posisition of particles wrt the centers
     """
     # choose one random colloid
-    sel = np.random.randint(len(centers))
+    if idx is None:
+        sel = np.random.randint(len(centers))
+    else:
+        sel = idx
 
     # decide if horizontal or vertical & get displacements in loop
     if is_horizontal(dirs[sel]):
         # down, up, right, left
-            shift = [
-            np.array([0,0,0]),
-            np.array([0,a,0]),
-            np.array([a/2,a/2,0]),
-            np.array([-a/2,a/2,0]) ]
+        shift = [
+        np.array([0,0,0]),
+        np.array([0,a,0]),
+        np.array([a/2,a/2,0]),
+        np.array([-a/2,a/2,0]) ]
     else:
         # right, left, up, down
-            shift = [
-            np.array([0,0,0]),
-            np.array([-a,0,0]),
-            np.array([-a/2,a/2,0]),
-            np.array([-a/2,-a/2,0]) ]
+        shift = [
+        np.array([0,0,0]),
+        np.array([-a,0,0]),
+        np.array([-a/2,a/2,0]),
+        np.array([-a/2,-a/2,0]) ]
 
     # get those positions & fix pbc
     pos_pbc = np.zeros((4,3))
@@ -201,7 +204,7 @@ def flip_loop(a,size,centers,dirs,rels):
     dirs, rels = flip_spin(dirs,rels,indices[2])
     dirs, rels = flip_spin(dirs,rels,indices[3])
 
-    return dirs, rels
+    return dirs, rels, pos_pbc
 
 
 def indices_lattice(vrt_lattice,centers,a,N):
@@ -229,10 +232,10 @@ def indices_lattice(vrt_lattice,centers,a,N):
             right = fix_position(cur_vrt + np.array([a/2,0,0]), a, N)
 
             # get the indices
-            up_idx = get_idx_from_position(centers,up)
-            down_idx = get_idx_from_position(centers,down)
-            left_idx = get_idx_from_position(centers,left)
-            right_idx = get_idx_from_position(centers,right)
+            up_idx = get_idx_from_position(centers,up,tol=0.05)
+            down_idx = get_idx_from_position(centers,down,tol=0.05)
+            left_idx = get_idx_from_position(centers,left,tol=0.05)
+            right_idx = get_idx_from_position(centers,right,tol=0.05)
 
             indices_matrix[i,j,:] = np.array([up_idx,down_idx,left_idx,right_idx])
     
@@ -584,23 +587,31 @@ def dotp(x,y):
 @jit(nopython=True)
 def single_msf_colloids(centers,dirs,rels,N,a,q):
 
-    suma = 0
+    cutoff =  10*a
+    suma = 0 # intialize
+
     # here i want to loop through all pairs
     for i in range(len(centers)):
         for j in range(i,len(centers)):
-            Sia_perp = perp_diff_spin(dirs[i][:2],q)
-            Sjb_perp = perp_diff_spin(dirs[j][:2],q)
             
-            # i am considering that the colloidal flip_spin
-            # is located at the center of the trap
-            riajb = numba_pbc_displacement( centers[i], centers[j], N*a ) 
+            riajb = numba_pbc_displacement( centers[i], centers[j], N*a )
 
-            term = dotp(Sia_perp,Sjb_perp) * np.exp(1j * dotp(q,riajb) )
+            if np.sqrt((riajb**2).sum()) < cutoff:
+                Sia_perp = perp_diff_spin(dirs[i][:2],q)
+                Sjb_perp = perp_diff_spin(dirs[j][:2],q)
+                
+                # i am considering that the colloidal flip_spin
+                # is located at the center of the trap
 
-            suma = suma + term.real
+                term = dotp(Sia_perp,Sjb_perp) * np.exp(1j * dotp(q,riajb) )
+                
+                suma = suma + term.real
+            else:
+                continue
+
             
 
-    # idk that the N in the equation is, i believe it is the number of vertices? N**2?
+    # idk if i should adjust the denominator for the fact that i added a cutoff
     return suma/2/(N**2)
 
 
@@ -619,3 +630,27 @@ def magnetic_structure_factor(centers,dirs,rels,N,a,reciprocal_lattice,rc_pairs,
         progress_proxy.update(1)
 
     return msf
+
+@jit(nopython=True)
+def charge_correlations(fcharge, fvertices, pairs, N, a):
+
+    L = N*a
+    # initialize correlation array
+    # corr, dx/a, dy/a
+
+    corr = np.zeros( (len(pairs),3) )
+
+    # loop through pairs
+    for k in range(len(pairs)):
+
+        # compute the product of paris qi* qj
+        corr[k,0] = fcharge[ pairs[k,0] ] * fcharge[ pairs[k,1] ] 
+
+        # take displacement with pbc
+        rij_pbc = numba_pbc_displacement(fvertices[ pairs[k,0]], fvertices[pairs[k,1]], L) / a
+        corr[k,1] = rij_pbc[0]
+        corr[k,2] = rij_pbc[1]
+        
+
+    
+    return corr

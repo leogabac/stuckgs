@@ -29,8 +29,10 @@ idx = pd.IndexSlice
 
 
 def reciprocal_space(N,a):
-    kx = 2*np.pi*np.fft.fftshift( np.fft.fftfreq(N,d=a) )
-    ky = 2*np.pi*np.fft.fftshift( np.fft.fftfreq(N,d=a) ) 
+    amount_bz = 3
+    klim = np.pi/a * amount_bz
+    kx = np.linspace(-klim,klim,120) 
+    ky = np.linspace(-klim,klim,120) 
 
     KX, KY = np.meshgrid(kx,ky)
     N = len(kx)
@@ -43,7 +45,7 @@ def reciprocal_space(N,a):
 
 
 # initialization
-N = 20
+N = 100
 print(f"N: {N}")
 a = params["lattice_constant"]
 
@@ -55,24 +57,21 @@ trj = trj_final.loc[idx[1,:,:]]
 # topology
 print("making topology...")
 centers, dirs, rels = mc.trj2numpy(trj)
-vrt_lattice = mc.vertices_lattice(a.magnitude,N,spos=(0,0))
-indices_matrix = mc.indices_lattice(vrt_lattice,centers,a.magnitude,N)
-arrow_lattice = mc.dipole_lattice(centers,dirs,rels, vrt_lattice, indices_matrix)
 reciprocal_lattice = reciprocal_space(N,a.magnitude)
 
 
 # good stuff
 print("computing magnetic structure factor...")
-pairwise_indices = np.array([[i,j] for i in range(N) for j in range(N)])
-
-with ProgressBar(total=len(pairwise_indices)) as progress:
+rs_indices = np.array([[i,j] for i in range(reciprocal_lattice.shape[0]) for j in range(reciprocal_lattice.shape[1])])
+with ProgressBar(total=len(rs_indices)) as progress:
     msf = mc.magnetic_structure_factor(
-        reciprocal_lattice,
-        arrow_lattice,
-        vrt_lattice,
+        centers,
+        dirs,
+        rels,
         N,
         a.magnitude,
-        pairwise_indices,
+        reciprocal_lattice,
+        rs_indices,
         progress)
 
 print("saving...")
