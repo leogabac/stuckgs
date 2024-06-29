@@ -21,6 +21,7 @@ import montecarlo as mc
 import chirality_tools as chir
 from numba import jit
 from numba_progress import ProgressBar
+from itertools import combinations
 
 
 ureg = ice.ureg
@@ -57,16 +58,20 @@ trj = trj_final.loc[idx[1,:,:]]
 print("making topology...")
 centers, dirs, rels = mc.trj2numpy(trj)
 reciprocal_lattice = reciprocal_space(N,a.magnitude)
+rs_indices = np.array(np.meshgrid(
+    np.arange(reciprocal_lattice.shape[0]),
+    np.arange(reciprocal_lattice.shape[0])
+    )).T.reshape(-1,2)
+pairs = np.asarray(list(combinations(np.arange(len(centers)),2)) + [(i,i) for i in range(len(centers))] )
 
 
 # good stuff
 print("computing magnetic structure factor...")
-rs_indices = np.array([[i,j] for i in range(reciprocal_lattice.shape[0]) for j in range(reciprocal_lattice.shape[1])])
 with ProgressBar(total=len(rs_indices)) as progress:
-    msf = mc.magnetic_structure_factor(
+    msf = mc.vector_msf(
+        pairs,
         centers,
         dirs,
-        rels,
         N,
         a.magnitude,
         reciprocal_lattice,

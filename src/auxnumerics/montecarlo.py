@@ -22,7 +22,7 @@ from math import isclose
 
 from auxiliary import *
 
-from numba import jit,prange
+from numba import jit,prange,float64,int64,complex128
 
 
 ureg = ice.ureg
@@ -539,7 +539,7 @@ def numba_pbc_displacement(xi,xj,L):
     return xij_pbc
 
 
-@jit(nopython=True)
+@jit(float64(float64[:],float64[:],float64),nopython=True)
 def numba_pbc_distance(xi,xj,L):
     """
         Computes the distance between xi an xj with PBC 
@@ -556,22 +556,6 @@ def numba_pbc_distance(xi,xj,L):
 
 
 @jit(nopython=True)
-def perp_diff_spin(Sia,q):
-    """
-        Perpendicular spin component to the diffusion vector q 
-        Sia = Sia - (Sia cdot q) q_hat 
-        ----------
-        Parameters:
-        * Sia: Some spin 
-        * q: Some position in the reciprocal_lattice
-    """
-    norma = np.linalg.norm(q)
-    qhat = q/norma
-
-    return Sia - qhat * ( qhat[0]*Sia[0] + qhat[1]*Sia[1] )
-
-
-@jit(nopython=True)
 def dotp(x,y):
     """
         Hardcoded dot product
@@ -584,7 +568,11 @@ def dotp(x,y):
 
 
 
-@jit(nopython=True)
+@jit(
+    complex128(float64[:, :], float64[:, :], float64[:, :], int64, float64, float64[:]),
+    nopython=True,
+    fastmath=True,
+)
 def single_msf_colloids(centers,dirs,rels,N,a,q):
 
     cutoff =  10*a
@@ -597,29 +585,24 @@ def single_msf_colloids(centers,dirs,rels,N,a,q):
             riajb = numba_pbc_displacement( centers[i], centers[j], N*a )
 
             if np.sqrt((riajb**2).sum()) < cutoff:
-                Sia_perp = perp_diff_spin(dirs[i][:2],q)
-                Sjb_perp = perp_diff_spin(dirs[j][:2],q)
-                
-                # i am considering that the colloidal flip_spin
-                # is located at the center of the trap
 
-                term = dotp(Sia_perp,Sjb_perp) * np.exp(1j * dotp(q,riajb) )
+                qhat = q/np.linalg.norm(q)
+                Sia_perp = dirs[i][:2] - qhat*dotp(qhat,dirs[i][:2])
+                Sjb_perp = dirs[j][:2] - qhat*dotp(qhat,dirs[j][:2])
                 
-                suma = suma + term.real
+                suma += ( dotp(Sia_perp,Sjb_perp) * np.exp(1j * dotp(q,riajb[:2]) ) )
             else:
                 continue
 
             
-
     # idk if i should adjust the denominator for the fact that i added a cutoff
-    return suma/2/(N**2)
+    return suma
 
-
-@jit(nopython=True,parallel=True)
+@jit(nopython=True,parallel=True,fastmath=True)
 def magnetic_structure_factor(centers,dirs,rels,N,a,reciprocal_lattice,rc_pairs,progress_proxy):
 
     rows, cols = reciprocal_lattice.shape[:2]
-    msf = np.zeros((rows,cols))
+    msf = np.zeros((rows,cols),dtype=np.complex128)
 
     for j in prange(len(rc_pairs)):
 
@@ -629,7 +612,8 @@ def magnetic_structure_factor(centers,dirs,rels,N,a,reciprocal_lattice,rc_pairs,
 
         progress_proxy.update(1)
 
-    return msf
+    # i did not divide by the number of spins...
+    return msf/2/(N**2)
 
 @jit(nopython=True)
 def charge_correlations(fcharge, fvertices, pairs, N, a):
@@ -654,3 +638,72 @@ def charge_correlations(fcharge, fvertices, pairs, N, a):
 
     
     return corr
+
+## NADA DE ESTO SIRVE PA PURA PINCHE VERGA
+
+@jit(nopython=True)
+def pick_elements(ox, ix):
+    n_cols = ox.shape[1]
+    result = np.empty(n_cols, dtype=ox.dtype)
+    
+    for col in range(n_cols):
+        result[col] = ox[ix[col], col]
+    
+    return result
+
+@jit(nopython=True)
+def vectorized_pbc_displacements(centers,pairs,L):
+    dx = centers[pairs[:,0],0] - centers[pairs[:,1],0]
+    dy = centers[pairs[:,0],1] - centers[pairs[:,1],1]
+    
+    ox = np.zeros((3,len(dx)))
+    ox[0,:] = dx
+    ox[1,:] = dx + L
+    ox[2,:] = dx - L
+    
+    oy = np.zeros((3,len(dy)))
+    oy[0,:] = dy
+    oy[1,:] = dy + L
+    oy[2,:] = dy - L
+    
+    ix = np.argmin(np.abs(ox),axis=0)
+    iy = np.argmin(np.abs(oy),axis=0)
+    return pick_elements(ox,ix), pick_elements(oy,iy)
+
+@jit(nopython=True)
+def vectorized_single_msf(pairs,centers,dirs,N,a,q):
+    dx,dy = vectorized_pbc_displacements(centers,pairs,N*a)
+    distances = np.sqrt(dx**2 + dy**2)
+    
+    b = distances <= 10*a
+
+    qhat = q/np.linalg.norm(q)
+    # here the idea is the following
+    # compute Sia - qhat * dot(Sia,qhat)
+    # here each row has a different Sia
+    # the operation dirs[pairs[:,0],:2] only selects spins according to pairs
+    # and produces a matrix where each row is a different spin
+    # then the dot product with qhat is simply the matrix/vector product S*hat,
+    # where now each row is the result of all different dot products
+    Sia = dirs[pairs[b,0],:2] - (qhat[:,np.newaxis] * np.dot(dirs[pairs[b,0],:2],qhat)).T
+    Sjb = dirs[pairs[b,1],:2] - (qhat[:,np.newaxis] * np.dot(dirs[pairs[b,1],:2],qhat)).T
+    return np.sum(np.sum(Sia*Sjb, axis=1)*np.exp(1j*(q[0]*dx[b]+q[1]*dy[b])))
+
+
+@jit(nopython=True,fastmath=True)
+def vector_msf(pairs,centers,dirs,N,a,reciprocal_lattice,rc_pairs,progress_proxy):
+
+    rows, cols = reciprocal_lattice.shape[:2]
+    msf = np.zeros((rows,cols),dtype=np.complex128)
+
+    for j in range(len(rc_pairs)):
+
+        idx = rc_pairs[j]
+        q = reciprocal_lattice[idx[0],idx[1],:]
+        msf[idx[0],idx[1]] = vectorized_single_msf(pairs,centers,dirs,N,a,q)
+
+        
+        progress_proxy.update(1)
+
+
+    return msf/2/(N**2)
