@@ -1,15 +1,12 @@
-# ============================================================= 
-# Some auxiliary functions to deal with order parameters
-# God bless whoever reads this code
-# Author: leogabac
-# ============================================================= 
-
+# =============================================================
+# Some auxiliary functions to deal with order parameters 
+# God bless whoever reads this code 
+# Author: leogabac 
+# =============================================================
 import os
 import sys
-
 sys.path.insert(0, '../icenumerics/')
-import icenumerics as ice
-
+import icenumerics as ice 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
