@@ -86,6 +86,34 @@ def classifyVertices(vrt):
     vrt.loc[vrt.eval("coordination==4 & charge == 4"),"type"] = "VI"
     return vrt
 
+def classify_vrt_expanded(vrt):
+    """
+        Classifies the vertices in I, IIa, IIb, IIIa, IIIb, IVa, IVb, Va, Vb, VI types.
+        Returns a DataFrame
+        ----------
+        Parameters:
+        * vrt (pd Dataframe): Vertices df
+    """
+
+    vrt["type"] = ['tmp']*len(vrt)
+
+    vrt.loc[vrt.eval("coordination==4 & charge == -4"),"type"] = "I"
+
+    vrt.loc[vrt.eval("coordination==4 & charge == -2 & dx**2>0 & dy**2==0"),"type"] = "IIa"
+    vrt.loc[vrt.eval("coordination==4 & charge == -2 & dx**2==0 & dy**2>0"),"type"] = "IIb"
+
+    vrt.loc[vrt.eval("coordination==4 & charge == 0 & (dx**2+dy**2)==0"),"type"] = "III"
+
+    vrt.loc[vrt.eval("coordination==4 & charge == 0 & dx*dy>0"),"type"] = "IVa"
+    vrt.loc[vrt.eval("coordination==4 & charge == 0 & dx*dy<0"),"type"] = "IVb"
+
+    vrt.loc[vrt.eval("coordination==4 & charge == 2 & dx**2==0 & dy**2>0"),"type"] = "Va"
+    vrt.loc[vrt.eval("coordination==4 & charge == 2 & dx**2>0 & dy**2==0"),"type"] = "Vb"
+
+    vrt.loc[vrt.eval("coordination==4 & charge == 4"),"type"] = "VI"
+    return vrt
+
+
 def getVerticesDict(path):
 
     """
