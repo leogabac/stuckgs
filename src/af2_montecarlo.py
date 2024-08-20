@@ -44,7 +44,6 @@ def simulated_annealing(file_path, mcsteps, centers, dirs, rels, realization):
         # compute dE
         dE = Enew - Eold
 
-        
         # Accept or reject the change
         if mc.is_accepted(dE,T):
             dirs = dirs_new.copy()
@@ -52,12 +51,9 @@ def simulated_annealing(file_path, mcsteps, centers, dirs, rels, realization):
 
             Eold = Enew
         else:
-            
             Eold = Eold
 
-
         T = 0.95*T
-    
     # save the stuff
     print('saving...')
     print(file_path)
@@ -68,7 +64,6 @@ def simulated_annealing(file_path, mcsteps, centers, dirs, rels, realization):
         df.to_csv(file_path)
     else:
         df.to_csv(file_path,mode='a',header=False)
-
 
 
 ## initializing data types

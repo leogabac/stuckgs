@@ -60,7 +60,7 @@ def trj2numpy(trj):
     return centers,dirs,rels
 
 
-def numpy2trj(centers,dirs,rels):
+def numpy2trj(centers,dirs,rels,vanilla=False):
     """
         Takes numpy arrays and converts them into a trj dataframe
         ----------
@@ -73,9 +73,12 @@ def numpy2trj(centers,dirs,rels):
     trj = np.concatenate([centers,dirs,rels],axis=1)
     trj = pd.DataFrame(trj,columns=['x','y','z','dx','dy','dz','cx','cy','cz'])
     trj['id'] = list(range(len(trj)))
-    trj['frame'] = [0]*len(trj)
-    trj = trj.set_index(['frame', 'id'])
-    return trj
+    if vanilla:
+        return trj
+    else:
+        trj['frame'] = [0]*len(trj)
+        trj = trj.set_index(['frame', 'id'])
+        return trj
 
 
 def flip_spin(dirs,rels,idx):

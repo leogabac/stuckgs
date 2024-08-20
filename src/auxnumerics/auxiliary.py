@@ -105,6 +105,7 @@ def classify_vrt_expanded(vrt):
     vrt.loc[vrt.eval("coordination==4 & charge == 0 & (dx**2+dy**2)==0"),"type"] = "III"
 
     vrt.loc[vrt.eval("coordination==4 & charge == 0 & dx*dy>0"),"type"] = "IVa"
+
     vrt.loc[vrt.eval("coordination==4 & charge == 0 & dx*dy<0"),"type"] = "IVb"
 
     vrt.loc[vrt.eval("coordination==4 & charge == 2 & dx**2==0 & dy**2>0"),"type"] = "Va"
