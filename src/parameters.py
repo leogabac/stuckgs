@@ -22,9 +22,9 @@ params = {
     "isperiodic":True,
 
     "total_time":TOTAL_TIME,
-    "framespersec":1*ureg.Hz,
+    "framespersec":10*ureg.Hz,
     "dt":0.1*ureg.ms,
-    "max_field":10*ureg.mT,
+    "max_field":1*ureg.mT,
     "sim_temp":300*ureg.K,
     "sim_dipole_cutoff":40*ureg.um,
 }

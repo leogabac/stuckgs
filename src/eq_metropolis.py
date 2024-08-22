@@ -27,7 +27,7 @@ def is_accepted(dE,kbT):
         return True
     else:
         r = np.random.rand()
-        if r<np.exp(arg):
+        if r<np.exp(-arg):
             return True
         else:
             return False
@@ -37,10 +37,13 @@ def save_state(centers,dirs,rels,energy,step,field,create=True):
     df['frame'] = [step]*len(centers)
     df['field'] = [field]*len(centers)
 
+    dfe = pd.DataFrame(data = np.array([[step,energy]]),columns=['frame','energy'])
     if create:
         df.to_csv(TRJ_SAVE_FILE,index=False)
+        dfe.to_csv(ENERGY_SAVE_FILE,index=False)
     else:
         df.to_csv(TRJ_SAVE_FILE,mode='a',header=False,index=False)
+        dfe.to_csv(ENERGY_SAVE_FILE,mode='a',header=False,index=False)
 
 
 def metropolis(centers, dirs, rels, prefactor, mcsteps=1000):
@@ -49,7 +52,6 @@ def metropolis(centers, dirs, rels, prefactor, mcsteps=1000):
     a = np.round(params['lattice_constant'].magnitude, 5)
     Eold = eg.calculate_energy(prefactor, N*a, atoms)
 
-    print(Eold)
     for i in tqdm(range(mcsteps)):
         # generate new state and compute energy
         dirsnew, relsnew, pos = mc.flip_loop(a,N,centers,dirs,rels)
@@ -106,13 +108,19 @@ col = ice.colloidal_ice(sp, particle, trap,
 particle_radius = params['particle_radius']
 col.region = np.array([[0,0,-3*(particle_radius/a/N).magnitude],[1,1,3*(particle_radius/a/N).magnitude]])*N*a
 
-## COMPUTING ENERGY SCALE PREFACTOR
-centers, dirs, rels = mc.trj2numpy(col.to_ctrj())
+fields = list(range(1,20+1))
 
-B = 1*ureg.mT
-m = np.pi * (2*params['particle_radius'])**3 *params['particle_susceptibility']*B/6/mu0
-prefactor = -(mu0*m**2/4/np.pi).to(ureg.pN * ureg.nm * ureg.um**3).magnitude
+for Bmag in fields:
+    os.system('clear')
+    print(f'Magnetic field {Bmag}')
+    ## COMPUTING ENERGY SCALE PREFACTOR
+    centers, dirs, rels = mc.trj2numpy(col.to_ctrj())
 
-## DOING METROPOLIS
-TRJ_SAVE_FILE = '/media/frieren/BIG/stuckgs/data/metropolis/trj.csv'
-metropolis(centers, dirs, rels, prefactor, mcsteps=1000)
+    B = Bmag*ureg.mT
+    m = np.pi * (2*params['particle_radius'])**3 *params['particle_susceptibility']*B/6/mu0
+    prefactor = -(mu0*m**2/4/np.pi).to(ureg.pN * ureg.nm * ureg.um**3).magnitude
+
+    ## DOING METROPOLIS
+    TRJ_SAVE_FILE = f'/media/frieren/BIG/stuckgs/data/metropolis/trj{Bmag}.csv'
+    ENERGY_SAVE_FILE = f'/media/frieren/BIG/stuckgs/data/metropolis/energy{Bmag}.csv'
+    metropolis(centers, dirs, rels, prefactor, mcsteps=100000)
