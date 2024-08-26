@@ -28,16 +28,17 @@ from parameters import params
 ureg = ice.ureg
 idx = pd.IndexSlice
 
-DATA_PATH = f'/media/frieren/BIG/stuckgs/data/metropolis/'
-FIELDS = list(range(1,21))
+DATA_PATH = f'/media/frieren/BIG/stuckgs/data/metropolis/1M/'
+all_files = [x for x in os.listdir(os.path.join(DATA_PATH,'OG')) if x.startswith('trj')]
 
 # first i want to loop all possible sizes
-for B in FIELDS:
+for file in all_files:
 
-    trj_file = os.path.join(DATA_PATH,f'trj{B}.csv')
-    vrt_file = os.path.join(DATA_PATH,f"vertices{B}.csv")
-    print(trj_file)
+    trj_file = os.path.join(DATA_PATH,file)
+    vrt_file = os.path.join(DATA_PATH,file.replace('trj','vertices'))
     params['size'] = 10
+
+    print('working with... ',trj_file)
 
     # creating the topology
     vrt_lattice = vrt.create_lattice(params['lattice_constant'].magnitude,params['size'])
