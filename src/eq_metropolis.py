@@ -71,7 +71,9 @@ def metropolis(centers, dirs, rels, prefactor, mcsteps=1000):
 
         if i==0:
             save_state(centers,dirs,rels,Eold,i,B,create=True)
-        else:
+        elif i % 50==0:
+            save_state(centers,dirs,rels,Eold,i,B,create=False)
+        elif i==999999:
             save_state(centers,dirs,rels,Eold,i,B,create=False)
 
 
@@ -108,7 +110,9 @@ col = ice.colloidal_ice(sp, particle, trap,
 particle_radius = params['particle_radius']
 col.region = np.array([[0,0,-3*(particle_radius/a/N).magnitude],[1,1,3*(particle_radius/a/N).magnitude]])*N*a
 
-fields = list(range(1,20+1))
+# fields = list(range(1,20+1))
+REALIZATION = 2
+fields = np.concatenate([np.arange(0,1,0.1), np.arange(1,3,0.2), np.array([3,5,7,10])])
 
 for Bmag in fields:
     os.system('clear')
@@ -117,10 +121,15 @@ for Bmag in fields:
     centers, dirs, rels = mc.trj2numpy(col.to_ctrj())
 
     B = Bmag*ureg.mT
+    Bstr = str(Bmag)
+
     m = np.pi * (2*params['particle_radius'])**3 *params['particle_susceptibility']*B/6/mu0
     prefactor = -(mu0*m**2/4/np.pi).to(ureg.pN * ureg.nm * ureg.um**3).magnitude
 
     ## DOING METROPOLIS
-    TRJ_SAVE_FILE = f'/media/frieren/BIG/stuckgs/data/metropolis/trj{Bmag}.csv'
-    ENERGY_SAVE_FILE = f'/media/frieren/BIG/stuckgs/data/metropolis/energy{Bmag}.csv'
-    metropolis(centers, dirs, rels, prefactor, mcsteps=100000)
+    if '.' in Bstr:
+        Bstrj = Bstr.replace('.','p')
+
+    TRJ_SAVE_FILE = f'/media/frieren/BIG/stuckgs/data/metropolis/trj{Bstr}.csv'
+    ENERGY_SAVE_FILE = f'/media/frieren/BIG/stuckgs/data/metropolis/energy{Bstr}.csv'
+    metropolis(centers, dirs, rels, prefactor, mcsteps=1000000)
