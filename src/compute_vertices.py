@@ -28,10 +28,10 @@ from parameters import params
 ureg = ice.ureg
 idx = pd.IndexSlice
 
-DATA_PATH = f'/media/frieren/BIG/stuckgs/data/metropolis/1M/'
-all_files = [x for x in os.listdir(os.path.join(DATA_PATH,'OG')) if x.startswith('trj')]
+REALIZATION = 2
+DATA_PATH = f'/media/frieren/BIG/stuckgs/data/metropolis/1M/r{REALIZATION}'
+all_files = [x for x in os.listdir(os.path.join(DATA_PATH)) if x.startswith('trj')]
 
-# first i want to loop all possible sizes
 for file in all_files:
 
     trj_file = os.path.join(DATA_PATH,file)
