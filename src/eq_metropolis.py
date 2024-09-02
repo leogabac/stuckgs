@@ -111,7 +111,7 @@ particle_radius = params['particle_radius']
 col.region = np.array([[0,0,-3*(particle_radius/a/N).magnitude],[1,1,3*(particle_radius/a/N).magnitude]])*N*a
 
 # fields = list(range(1,20+1))
-REALIZATION = 2
+REALIZATION = 8
 fields = np.concatenate([np.arange(0,1,0.1), np.arange(1,3,0.2), np.array([3,5,7,10])])
 
 for Bmag in fields:
@@ -130,6 +130,6 @@ for Bmag in fields:
     if '.' in Bstr:
         Bstrj = Bstr.replace('.','p')
 
-    TRJ_SAVE_FILE = f'/media/frieren/BIG/stuckgs/data/metropolis/trj{Bstr}.csv'
-    ENERGY_SAVE_FILE = f'/media/frieren/BIG/stuckgs/data/metropolis/energy{Bstr}.csv'
+    TRJ_SAVE_FILE = f'/media/frieren/BIG/stuckgs/data/metropolis/1M/r{REALIZATION}/trj{Bstr}.csv'
+    ENERGY_SAVE_FILE = f'/media/frieren/BIG/stuckgs/data/metropolis/1M/r{REALIZATION}/energy{Bstr}.csv'
     metropolis(centers, dirs, rels, prefactor, mcsteps=1000000)

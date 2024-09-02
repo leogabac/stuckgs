@@ -28,7 +28,7 @@ from parameters import params
 ureg = ice.ureg
 idx = pd.IndexSlice
 
-REALIZATION = 2
+REALIZATION = 5
 DATA_PATH = f'/media/frieren/BIG/stuckgs/data/metropolis/1M/r{REALIZATION}'
 all_files = [x for x in os.listdir(os.path.join(DATA_PATH)) if x.startswith('trj')]
 
