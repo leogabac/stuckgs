@@ -103,15 +103,15 @@ params['max_field'] = 2*ureg.mT
 params['total_time'] = 6100*ureg.s
 params['framespersec'] = 1*ureg.Hz
 
-with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-    results = list(
-        executor.map(
-            run_simulation,
-            [params] * len(REALIZATIONS),
-            [SIZE] * len(REALIZATIONS),
-            REALIZATIONS,
-        )
-    )
+# with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+#     results = list(
+#         executor.map(
+#             run_simulation,
+#             [params] * len(REALIZATIONS),
+#             [SIZE] * len(REALIZATIONS),
+#             REALIZATIONS,
+#         )
+#     )
 
 for i in range(1,11):
     print(f'===== Realization {i} =====')

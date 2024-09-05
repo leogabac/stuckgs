@@ -325,10 +325,8 @@ def load_ctrj_and_vertices(params,data_path,size,realization = 1):
     ctrj = pd.read_csv(os.path.join(data_path,str(size),'trj','trj1.csv'),index_col=[0,1])
     vrt = pd.read_csv(os.path.join(data_path,str(size),'vertices','vertices1.csv'),index_col=[0,1])
     last_frame = vrt.index.get_level_values('frame').unique()[-1]
-    
     v = ice.vertices()
     v.vertices = vrt
-    
     return params,ctrj,v,last_frame
 
 def get_rparalell(ctrj,particle,frame):

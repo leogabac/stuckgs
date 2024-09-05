@@ -28,8 +28,9 @@ from parameters import params
 ureg = ice.ureg
 idx = pd.IndexSlice
 
-REALIZATION = 5
-DATA_PATH = f'/media/frieren/BIG/stuckgs/data/metropolis/1M/r{REALIZATION}'
+DRIVE_MOUNT = '/media/frieren/BIG/'
+PROJECT = 'stuckgs/data'
+DATA_PATH = os.path.join(DRIVE_MOUNT,PROJECT,'sims_superslow_preliminary')
 all_files = [x for x in os.listdir(os.path.join(DATA_PATH)) if x.startswith('trj')]
 
 for file in all_files:
