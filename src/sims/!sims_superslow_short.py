@@ -88,7 +88,7 @@ def load_simulation(params,data_path,size,realization):
 
 SIZE = 30
 REALIZATIONS = [1,2,3,4,5,6,7,8,9,10]
-DATA_PATH = '/media/frieren/BIG/stuckgs/data/sims_superslow_short/'
+DATA_PATH = '/home/frieren/BIG/stuckgs/data/sims_superslow_short/'
 
 params['max_field'] = 5*ureg.mT
 params['total_time'] = 15000*ureg.s
