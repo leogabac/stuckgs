@@ -80,3 +80,4 @@ with ProgressBar(total=len(rs_indices)) as progress:
 
 print("saving...")
 pd.DataFrame(msf).to_csv(f'../data/q2_degeneracy/msf{N}.csv', header=False, index=False)
+
