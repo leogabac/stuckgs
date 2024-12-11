@@ -28,7 +28,7 @@ from parameters import params
 ureg = ice.ureg
 idx = pd.IndexSlice
 
-DRIVE_MOUNT = '/home/frieren/BIG/'
+DRIVE_MOUNT = '/mnt/BIG/'
 PROJECT = 'stuckgs/data'
 DATA_PATH = os.path.join(DRIVE_MOUNT,PROJECT,'sims_superslow_short')
 all_files = [x for x in os.listdir(os.path.join(DATA_PATH)) if x.startswith('trj')]
@@ -37,7 +37,7 @@ for file in all_files:
 
     trj_file = os.path.join(DATA_PATH,file)
     vrt_file = os.path.join(DATA_PATH,file.replace('trj','vertices'))
-    params['size'] = 10
+    params['size'] = 30
 
     print('working with... ',trj_file)
 
@@ -50,7 +50,7 @@ for file in all_files:
     # Doing shit with the vertices
     frames = trj.index.get_level_values('frame').unique().to_list()
 
-    for frame in tqdm(frames):
+    for frame in tqdm(frames[::10]):
 
         # here the idea is to go frame by frame computing the topological charges
         # and generate the same structure than the vertices module from icenumerics
