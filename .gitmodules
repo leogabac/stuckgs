@@ -1,0 +1,4 @@
+[submodule "icenumerics"]
+	path = icenumerics
+	url = https://github.com/leogabac/icenumerics.git
+	branch = dev
