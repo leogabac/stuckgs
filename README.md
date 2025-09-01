@@ -15,7 +15,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-2. Clone `leogabac/icenumerics` and `aortiza/magcolloids` and change to the `dev` branch.
+2. Clone `leogabac/icenumerics` and `aortiza/magcolloids` (submodule) and change to the `dev` branch.
 
 ```
 cd stuckgs
