@@ -7,7 +7,7 @@ import pandas as pd
 from tqdm import tqdm
 from IPython.display import clear_output
 
-sys.path.insert(0, '../../../icenumerics/')
+sys.path.insert(0, '../../icenumerics/')
 sys.path.insert(0, '../')
 
 import icenumerics as ice
