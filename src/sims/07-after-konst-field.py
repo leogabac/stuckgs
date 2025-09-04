@@ -1,24 +1,22 @@
 import os
 import sys
-import numpy as np
-import pandas as pd
-import subprocess
-from pathlib import Path
 
 sys.path.insert(0, "../../icenumerics/")
 sys.path.insert(0, "../auxnumerics/")
 sys.path.insert(0, "../")  # for parameters.py
 
 
-import icenumerics as ice
-import concurrent.futures
-import auxiliary as aux
-import vertices as vrt
-
-from parameters import params
 from tqdm import tqdm
-import importlib
-import argparse
+from parameters import params
+import vertices as vrt
+import auxiliary as aux
+import concurrent.futures
+import icenumerics as ice
+import numpy as np
+import pandas as pd
+import subprocess
+from pathlib import Path
+
 
 ureg = ice.ureg
 idx = pd.IndexSlice
@@ -111,6 +109,11 @@ def load_simulation(params, trj, data_path, size, realization):
     ice.get_ice_trj_low_memory(col, dir_name=trj_path)
 
 
+def load_initial_condiiton(filepath):
+    trj = pd.read_csv(filepath,index_col = ['id'])
+    return trj
+
+
 # ==============================================================================
 # MAIN SCRIPT
 # ==============================================================================
@@ -145,6 +148,7 @@ FIELD = 20
 # running the simulations
 
 params["max_field"] = FIELD * ureg.mT
+params["total_time"] = 3600 * ureg.s
 
 print("=" * 80)
 print("INFO")
@@ -153,22 +157,21 @@ print("=" * 80)
 print(f"max field: \t {params['max_field']}")
 print(f"total time: \t {params['total_time']}")
 
-# TODO: 
-# get the 10 trj of the 30 x 30 system
-# save the last frame of simulation of those
+# TODO:
 # load those initial conditions
 # pass the initial conditions as a list for parallelization
 # run and see what happens
 
 # this should be a list of 10 trajectories of the last simulation frame
-initial_conditions = []
+sim_type = 'fast'
+initial_conditions = [load_initial_condiiton(os.path.join(INIT_COND_DIR, f"{sim_type}-{realization}.csv")) for realization in REALIZATIONS]
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=14) as executor:
     results = list(
         executor.map(
             run_simulation,
             [params] * len(REALIZATIONS),
-            initial_conditions
+            initial_conditions,
             [int(SIZE)] * len(REALIZATIONS),
             REALIZATIONS,
         )
