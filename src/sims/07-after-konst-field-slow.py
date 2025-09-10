@@ -115,7 +115,7 @@ REPO_ROOT = subprocess.check_output(
 ).strip()
 
 SCRIPT = os.path.basename(__file__).split(".")[0]
-DATA_DIR = os.path.join(REPO_ROOT, "data", SCRIPT)
+DATA_DIR = os.path.join(REPO_ROOT, "data", '07-after-konst-field')
 INIT_COND_DIR = os.path.join(DATA_DIR, "initial-conditions")  # initial conditions
 SIM_TYPE = "slow"
 LAMMPS_DIR = os.path.join(DATA_DIR, f"lammps-files-{SIM_TYPE}")
