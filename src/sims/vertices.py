@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-# own
 sys.path.insert(0, "../../icenumerics/")
 sys.path.insert(0, "../auxnumerics/")
 sys.path.insert(0, "../")  # for parameters.py
@@ -13,32 +12,18 @@ import icenumerics as ice
 import vertices as vrt
 from parameters import params
 
-ureg = ice.ureg
-idx = pd.IndexSlice
-
-# ===============================================================================
-# if len(sys.argv) != 2:
-#     print("Usage: python compute_vertices.py <testXX>")
-#     sys.exit(1)
-#
-# script_name = sys.argv[0][:-3]
-# usr_input = sys.argv[1]
-#
-# # I might sometimes provide a single size so what usr_input is testXX/size/
-# parts = usr_input.split("/")
-# if len(parts) > 1:
-#     has_pre_dir = True
-# else:
-#     has_pre_dir = False
-#
-# DATA_PATH = f"/home/frieren/BIG/reentrancy/{usr_input}/"
-# SIZES = next(os.walk(DATA_PATH))[1]
-# REALIZATIONS = 10
-#
-
 
 def compute_vertices(data_dir, size, realizations):
-    # creating the topology
+    """
+    Compute the vertices' CSV file with schema
+    [frame, vertex, x, y, coordination, charge, dx, dy]
+
+    Parameters:
+    ----------
+    - data_dir: str, directory where the trj files are located.
+    - size: int, vertices per side.
+    - realization: int
+    """
     df_cols = [
         "frame",
         "vertex",
@@ -97,8 +82,8 @@ def compute_vertices(data_dir, size, realizations):
             dipoles = dip_lattice * mask[:, :, np.newaxis]
 
             # now is time to reshape
-            vrt_coord_list = vrt_lattice.reshape(size ** 2, 3)
-            dip_list = dipoles.reshape(size ** 2, 3)
+            vrt_coord_list = vrt_lattice.reshape(size**2, 3)
+            dip_list = dipoles.reshape(size**2, 3)
             q_list = q_frame.reshape(-1)
 
             # put together
