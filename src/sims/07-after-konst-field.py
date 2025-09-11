@@ -14,7 +14,7 @@ import concurrent.futures
 
 import icenumerics as ice
 import auxiliary as aux
-from vertices import compute_vertices
+# from vertices import compute_vertices
 from parameters import params
 
 ureg = ice.ureg
