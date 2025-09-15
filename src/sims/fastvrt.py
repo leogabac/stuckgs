@@ -24,6 +24,7 @@ def compute_vertices(data_dir, size, realizations):
     - size: int, vertices per side.
     - realization: int
     """
+
     df_cols = [
         "frame",
         "vertex",
@@ -37,8 +38,8 @@ def compute_vertices(data_dir, size, realizations):
 
     vrt_lattice = vrt.create_lattice(params["lattice_constant"].magnitude, size)
     for i in realizations:
-        trj_file = os.path.join(data_dir, f"xtrj{i}.csv")
-        vrt_file = os.path.join(data_dir, f"vertices{i}.csv")
+        trj_file = os.path.join(data_dir, f"trj{i}.csv")
+        vrt_file = os.path.join(data_dir, f"vrt{i}.csv")
 
         if os.path.isfile(vrt_file):
             print(f"[INFO] \t {vrt_file} exists, skipping")

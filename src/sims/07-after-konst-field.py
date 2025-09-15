@@ -14,7 +14,7 @@ import concurrent.futures
 
 import icenumerics as ice
 import auxiliary as aux
-# from vertices import compute_vertices
+from fastvrt import compute_vertices
 from parameters import params
 
 ureg = ice.ureg
@@ -116,6 +116,7 @@ REPO_ROOT = subprocess.check_output(
 
 SCRIPT = os.path.basename(__file__).split(".")[0]
 DATA_DIR = os.path.join(REPO_ROOT, "data", SCRIPT)
+# DATA_DIR = "/run/media/holo/aura/BIG/stuckgs/data/07-after-konst-field/"
 INIT_COND_DIR = os.path.join(DATA_DIR, "initial-conditions")  # initial conditions
 SIM_TYPE = "fast"
 LAMMPS_DIR = os.path.join(DATA_DIR, f"lammps-files-{SIM_TYPE}")
@@ -188,4 +189,4 @@ if __name__ == "__main__":
 
     if args.vertices:
         print("=" * 80, "MAKING VERTICES", "=" * 80, sep="\n")
-        print("pending implementation")
+        compute_vertices(DATA_DIR, SIZE, REALIZATIONS)
