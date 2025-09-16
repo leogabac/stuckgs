@@ -1,0 +1,5 @@
+#! /bin/bash
+
+source ./.venv/bin/activate
+cd $HOME
+jupyter lab --port=8001
